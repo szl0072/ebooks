@@ -77,3 +77,6 @@
 
 24.foxebook.net  
 >[http://www.foxebook.net/](http://www.foxebook.net/)  
+
+25.kindle88.com  
+>[kindle88.com](http://www.kindle88.com/)

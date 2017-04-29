@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <h2 id="%E5%8D%95%E4%B8%AA%E6%96%87%E4%BB%B6">单个文件</h2>
+    <p>加密和解密：</p>
+    <pre>
+      <code># openssl des -salt -in file -out file.des
+# openssl des -d -salt -in file.des -out file</code>
+    </pre>
+    <p>那个 file 可以是归档文件(tar archive)。</p>
+    <h2 id="%E5%BD%92%E6%A1%A3%E5%B9%B6%E5%8A%A0%E5%AF%86%E6%95%B4%E4%B8%AA%E7%9B%AE%E5%BD%95">归档并加密整个目录</h2>
+    <pre>
+      <code># tar -cf - directory | openssl des -salt -out directory.tar.des      # 加密
+# openssl des -d -salt -in directory.tar.des | tar -x                 # 解密</code>
+    </pre>
+    <h2 id="%E5%8E%8B%E7%BC%A9%E5%BD%92%E6%A1%A3%E5%B9%B6%E5%8A%A0%E5%AF%86%E6%95%B4%E4%B8%AA%E7%9B%AE%E5%BD%95">压缩归档并加密整个目录</h2>
+    <pre>
+      <code># tar -zcf - directory | openssl des -salt -out directory.tar.gz.des  # 加密
+# openssl des -d -salt -in directory.tar.gz.des | tar -xz             # 解密</code>
+    </pre>
+    <ul>
+      <li>
+        <p>在使用-k mysecretpassword后，des会取消交互式的密码请求。不过，这非常不安全。</p>
+      </li>
+      <li>
+        <p>使用des3代替des来获得更强的加密(Triple-DES Cipher)。这同样会消耗更多的CPU。</p>
+      </li>
+    </ul>
+    <h2 id="gpg">GPG</h2>
+    <p><a href="http://gnupg.org/">GnuPG</a> 是众所周知的对邮件或任何数据进行加密和签名的软件。此外，gpg 还提供高级密钥管理系统。此章节只涵盖了文件加密，没有邮件加密、签名或者信任网络(Web-Of-Trust)。<br/>
+单纯的加密是一个对称式的加密算法(symmetric cipher)。在本例中，文件是用一个秘密来加密的，任何人知道了这个密码都可以对其进行解密，因此就不需要密钥。Gpg 添加后缀 ".gpg" 到已加密的文件名。</p>
+    <pre>
+      <code># gpg -c file                        # 使用密码加密文件
+# gpg file.gpg                       # 文件解密(选项 -o 其他文件)</code>
+    </pre>
+    <h2 id="%E4%BD%BF%E7%94%A8%E5%AF%86%E9%92%A5">使用密钥</h2>
+    <p>对于更详细的请看 <a href="http://www.madboa.com/geek/gpg-quickstart">GPG 快速上手</a> 和 <a href="http://aplawrence.com/Basics/gpg.html">GPG/PGP 基础</a>，特别是 <a href="http://gnupg.org/documentation">gnupg 文档</a>。<br/>
+密钥对(私钥，公钥)为非对称加密技术。 要点如下：</p>
+    <ul>
+      <li>
+        <p>你的公钥是用来给_别人_加密文件的并且只有你作为接收者才可以解密(甚至不是一个人加密的文件也可以解密)。公钥是公开的也就意味着可以分发。</p>
+      </li>
+      <li>
+        <p>用你的密码加密的私钥用来解密用_你的_公钥加密的文件。这个密钥必须保持<em>安全</em>。因为如果遗失了私钥或者密码，那么所有的文件都是使用你的公钥加密的。</p>
+      </li>
+      <li>
+        <p>多个密钥文件被称为密钥环(keyrings)，她可以包含一个以上的密钥。</p>
+      </li>
+    </ul>
+    <p>首先生成密钥对。使用默认就行，但你至少要输入你的全名、邮件地址和可选注释。该注释对于创建相同的名字和邮件地址的多个密钥来说非常有用。此外，你应该使用"口令(passphrase)"，而不是简单的密码。</p>
+    <pre>
+      <code># gpg --gen-key                      # 这需要一些时间</code>
+    </pre>
+    <p>在 Unix 上密钥存储在 ~/.gnupg/ 中，在 Windows 上通常存储在<br/>
+C:/Documents and Settings/%USERNAME%/Application Data/gnupg/ 中。</p>
+    <pre>
+      <code>~/.gnupg/pubring.gpg                 # 包含你的公钥和所有其他导入的信息
+~/.gnupg/secring.gpg                 # 可包含多个私钥</code>
+    </pre>
+    <p>常用选项的简短描述：</p>
+    <ul>
+      <li>
+        <p><strong>-e</strong> 加密数据</p>
+      </li>
+      <li>
+        <p><strong>-d</strong> 解密数据</p>
+      </li>
+      <li>
+        <p><strong>-r</strong> 为某个收件者加密('全名' 或者 'email@domain')</p>
+      </li>
+      <li>
+        <p><strong>-a</strong> 输出经过 ascii 封装的密钥</p>
+      </li>
+      <li><strong>-o</strong> 指定输出文件</li>
+    </ul>
+    <p>本实例使用'Your Name' 和 'Alice' 作为密钥的 email 或 全名 或 部分名字的参考。举个例子，我可以使用 'Colin' or 'c@cb.vu' 给我的密钥 [Colin Barschel (cb.vu) <a href="mailto:c@cb.vu">c@cb.vu</a>]。</p>
+    <h2 id="%E5%8F%AA%E7%94%A8%E4%BA%8E%E4%B8%AA%E4%BA%BA%E7%9A%84%E5%8A%A0%E5%AF%86">只用于个人的加密</h2>
+    <p>不需要导出/导入任何密钥，因为你都已经有了。</p>
+    <pre>
+      <code># gpg -e -r 'Your Name' file                  # 使用你的公钥加密
+# gpg -o file -d file.gpg                     # 解密。使用 -o 指定输出文件</code>
+    </pre>
+    <h2 id="%E7%94%A8%E5%AF%86%E9%92%A5%E5%8A%A0%E5%AF%86-%E8%A7%A3%E5%AF%86">用密钥加密-解密</h2>
+    <p>首先你需要导出给别人使用的公钥。并且你需要导入来自 Alice 她所加密文件的公钥。你可以用简单的 ascii 文档或者使用公钥服务器来保存这些密钥。<br/>
+举个例子，Alice 导出她的公钥，然后你导入它，之后你就可以加密一个文件给她。这个加密文件只有 Alice 可以解密。</p>
+    <pre>
+      <code># gpg -a -o alicekey.asc --export 'Alice'               # Alice 导出她的公钥到 ascii 文件中
+# gpg --send-keys --keyserver subkeys.pgp.net KEYID     # Alice 把她的公钥放入一个服务器
+# gpg --import alicekey.asc                             # 你导入她的密钥到你的公钥环(pubring)中
+# gpg --search-keys --keyserver subkeys.pgp.net 'Alice' # 或者从一个服务器中获取他的公钥</code>
+    </pre>
+    <p>一旦这些公钥导入后，加密或解密一个文件会非常简单：</p>
+    <pre>
+      <code># gpg -e -r 'Alice' file                      # 给 Alice 加密文件
+# gpg -d file.gpg -o file                     # 解密 Alice 给你的加密文件</code>
+    </pre>
+    <h2 id="%E5%AF%86%E9%92%A5%E7%AE%A1%E7%90%86">密钥管理</h2>
+    <pre>
+      <code>    # gpg --list-keys                             # 列出所有公钥并查看其 KEYID
+    KEYID 跟在 '/' 后面 比如：pub   1024D/D12B77CE 它的 KEYID 是 D12B77CE
+    # gpg --gen-revoke 'Your Name'                # 产生一份撤销密钥证书
+    # gpg --list-secret-keys                      # 列出所有私钥
+    # gpg --delete-keys NAME                      # 从本的密钥环中删除一个公钥
+    # gpg --delete-secret-key NAME                # 从本的密钥环中删除一个私钥
+    # gpg --fingerprint KEYID                     # 显示 KIYID 这个密钥的指纹
+    # gpg --edit-key KEYID                        # 编辑密钥(比如签名或者添加/删除 email)</code>
+    </pre>
+  </body>
+</html>

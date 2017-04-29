@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <p>磁盘限额用来限制磁盘空间大小和/或用户(或用户组)可用的文件数。The quotas are allocated on a per-file system basis and are enforced by the kernel.</p>
+    <h2 id="linux+%E8%AE%BE%E7%BD%AE">Linux 设置</h2>
+    <p>Quota 工具包通常已安装，其包含一些命令行工具。<br/>
+在 fstab 中激活用户配额并重新挂载分区。如果分区正在使用，关闭所有使用的文件，或者重启系统。添加 <code>usrquota</code> 到 fstab 的挂载类型中，举个例子：</p>
+    <pre>
+      <code>/dev/sda2     /home    reiserfs     rw,acl,user_xattr,usrquota 1 1
+# mount -o remount /home
+# mount                              # 检查 usrquota 已经激活，否则重启</code>
+    </pre>
+    <p>用 <code>quotacheck</code> 初始化 quota.user 文件。</p>
+    <pre>
+      <code># quotacheck -vum /home
+# chmod 644 /home/aquota.user        # 让用户检查自己的配额</code>
+    </pre>
+    <p>用脚本(e.g. SuSE 的 /etc/init.d/quotad)或 <code>quotaon</code> 来启用限额：</p>
+    <pre>
+      <code>quotaon -vu /home</code>
+    </pre>
+    <p>检查配额启用情况：</p>
+    <pre>
+      <code>quota -v</code>
+    </pre>
+    <h2 id="freebsd+%E8%AE%BE%E7%BD%AE">FreeBSD 设置</h2>
+    <p>Quota 工具是 FreeBSD 基本系统的一部分，然而内核需要 quota 选项。如果不存在，新增它并<a href="http://cb.vu/unixtoolbox_zh_CN.xhtml#compilekernel">重新编译</a>内核。</p>
+    <pre>
+      <code>options QUOTA</code>
+    </pre>
+    <p>与 Linux 一样，添加限额到 fstab 选项(是 userquota，而不是 usrquota)中：</p>
+    <pre>
+      <code>/dev/ad0s1d    /home    ufs     rw,noatime,userquota    2  2
+# mount /home                        # 重新挂载分区</code>
+    </pre>
+    <p>在 /etc/rc.conf 中启用磁盘限额并开启 quota 服务。</p>
+    <pre>
+      <code># grep quotas /etc/rc.conf
+enable_quotas="YES"                  # 在启动时打开限额(或者 "NO")
+check_quotas="YES"                   # 在启动时检查限额(或者 "NO")
+# /etc/rc.d/quota start</code>
+    </pre>
+    <h2 id="%E5%88%86%E9%85%8D%E9%99%90%E9%A2%9D">分配限额</h2>
+    <p>磁盘限额默认并不限制(设置为0)。用 <code>edquota</code> 来对单用户进行限制。一个 quota 也可给许多用户复用。虽然 quota 实现之间的文件结构不同，但其原理是相同的：限制节点(inodes)数量以及使用者可以取用的磁盘区块数量。<em>Only change the values of soft and hard</em>. 如果未指定，默认区块大小为 1k。使用 <code>edquota -t</code> 设置 grace 时间。举个例子：</p>
+    <pre>
+      <code># edquota -u colin</code>
+    </pre>
+    <h3 id="linux-22">Linux</h3>
+    <pre>
+      <code>Disk quotas for user colin (uid 1007):
+  Filesystem         blocks       soft       hard     inodes     soft     hard
+  /dev/sda8            108       1000       2000          1        0        0</code>
+    </pre>
+    <h3 id="freebsd-21">FreeBSD</h3>
+    <pre>
+      <code>Quotas for user colin:
+/home: kbytes in use: 504184, limits (soft = 700000, hard = 800000)
+   inodes in use: 1792, limits (soft = 0, hard = 0)</code>
+    </pre>
+    <h2 id="%E7%BB%99%E8%AE%B8%E5%A4%9A%E7%94%A8%E6%88%B7%E5%88%86%E9%85%8D%E9%99%90%E9%A2%9D">给许多用户分配限额</h2>
+    <p>命令 <code>edquota -p</code> 用来复用一个 quota 给其他用户。举个例子，复用所指用户的限额给所有用户：</p>
+    <pre>
+      <code># edquota -p refuser `awk -F: $3 &gt; 499 {print $1}' /etc/passwd`
+# edquota -p refuser user1 user2     # 复用给 2 个用户</code>
+    </pre>
+    <h2 id="%E6%A3%80%E6%9F%A5">检查</h2>
+    <p>用户只需输入 <code>quota</code> (文件 quota.user 必须可读) 来可以检查他们的限额。Root 可以查看所有用户的限额。</p>
+    <pre>
+      <code># quota -u colin                     # 查看用户的限额
+# repquota /home                     # 所有用户在这个分区上的限额情况</code>
+    </pre>
+  </body>
+</html>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <p><a href="http://subversion.tigris.org/">Subversion (SVN)</a> is a version control system designed to be the successor of CVS (Concurrent Versions System). The concept is similar to CVS, but many shortcomings where improved. See also the <a href="http://svnbook.red-bean.com/en/1.4/">SVN book</a>.</p>
+    <h3 id="server+setup">Server setup</h3>
+    <p>The initiation of the repository is fairly simple (here for example <code>/home/svn/</code> must exist):</p>
+    <pre>
+      <code># svnadmin create --fs-type fsfs /home/svn/project1</code>
+    </pre>
+    <p>Now the access to the repository is made possible with:</p>
+    <ul>
+      <li>
+        <p><code>file://</code> Direct file system access with the svn client with. This requires local permissions on the file system.</p>
+      </li>
+      <li>
+        <p><code>svn://</code> or <code>svn+ssh://</code> Remote access with the svnserve server (also over SSH). This requires local permissions on the file system.</p>
+      </li>
+      <li>
+        <p><code>http://</code> Remote access with webdav using apache. No local users are necessary for this method.</p>
+      </li>
+    </ul>
+    <p>Using the local file system, it is now possible to import and then check out an existing project. Unlike with CVS it is not necessary to cd into the project directory, simply give the full path:</p>
+    <pre>
+      <code># svn import /project1/ file:///home/svn/project1/trunk -m 'Initial import'
+# svn checkout file:///home/svn/project1</code>
+    </pre>
+    <p>The new directory "trunk" is only a convention, this is not required.</p>
+    <h3 id="remote+access+with+ssh">Remote access with ssh</h3>
+    <p>No special setup is required to access the repository via ssh, simply replace <code>file://</code> with <code>svn+ssh/hostname</code>. For example:</p>
+    <pre>
+      <code># svn checkout svn+ssh://hostname/home/svn/project1</code>
+    </pre>
+    <p>As with the local file access, every user needs an ssh access to the server (with a local account) and also read/write access. This method might be suitable for a small group. All users could belong to a subversion group which owns the repository, for example:</p>
+    <pre>
+      <code># groupadd subversion
+# groupmod -A user1 subversion
+# chown -R root:subversion /home/svn
+# chmod -R 770 /home/svn</code>
+    </pre>
+    <h3 id="remote+access+with+http+%28apache%29">Remote access with http (apache)</h3>
+    <p>Remote access over http (https) is the only good solution for a larger user group. This method uses the apache authentication, not the local accounts. This is a typical but small apache configuration:</p>
+    <pre>
+      <code>LoadModule dav_module         modules/mod_dav.so
+LoadModule dav_svn_module     modules/mod_dav_svn.so
+LoadModule authz_svn_module   modules/mod_authz_svn.so    # Only for access control
+
+&lt;Location /svn&gt;
+  DAV svn  # any "/svn/foo" URL will map to a repository /home/svn/foo
+  SVNParentPath /home/svn
+  AuthType Basic
+  AuthName "Subversion repository"
+  AuthzSVNAccessFile /etc/apache2/svn.acl
+  AuthUserFile /etc/apache2/svn-passwd
+  Require valid-user
+&lt;/Location&gt;</code>
+    </pre>
+    <p>The apache server needs full access to the repository:</p>
+    <pre>
+      <code># chown -R www:www /home/svn</code>
+    </pre>
+    <p>Create a user with htpasswd2:</p>
+    <pre>
+      <code># htpasswd -c /etc/svn-passwd user1  # -c creates the file</code>
+    </pre>
+    <h4 id="access+control+svn.acl+example">Access control svn.acl example</h4>
+    <pre>
+      <code># Default it read access. "* =" would be default no access[/]
+* = r
+[groups]
+project1-developers = joe, jack, jane# Give write access to the developers[project1:]
+@project1-developers = rw</code>
+    </pre>
+    <h3 id="svn+commands+and+usage">SVN commands and usage</h3>
+    <p>See also the <a href="http://www.cs.put.poznan.pl/csobaniec/Papers/svn-refcard.pdf">Subversion Quick Reference Card</a>. <a href="http://tortoisesvn.tigris.org/">Tortoise SVN</a> is a nice Windows interface.</p>
+    <h3 id="import">Import</h3>
+    <p>A new project, that is a directory with some files, is imported into the repository with the <code>import</code> command. Import is also used to add a directory with its content to an existing project.</p>
+    <pre>
+      <code># svn help import                                # Get help for any command    
+# Add a new directory (with content) into the src dir on project1
+# svn import /project1/newdir http://host.url/svn/project1/trunk/src -m 'add newdir'</code>
+    </pre>
+    <h3 id="typical+svn+commands">Typical SVN commands</h3>
+    <pre>
+      <code># svn co http://host.url/svn/project1/trunk      # Checkout the most recent version    
+# Tags and branches are created by copying
+# svn mkdir http://host.url/svn/project1/tags/   # Create the tags directory
+
+# svn copy -m "Tag rc1 rel." http://host.url/svn/project1/trunk \
+                             http://host.url/svn/project1/tags/1.0rc1
+# svn status [--verbose]                         # Check files status into working dir
+# svn add src/file.h src/file.cpp                # Add two files
+# svn commit -m 'Added new class file'           # Commit the changes with a message
+# svn ls http://host.url/svn/project1/tags/      # List all tags
+# svn move foo.c bar.c                           # Move (rename) files
+# svn delete some_old_file                       # Delete files</code>
+    </pre>
+  </body>
+</html>

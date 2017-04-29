@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <p>Sudo 可以给用户一些超级用户的权限而不需要 root 密码。Sudo 对于一个服务器和工作站混合的多用户环境来说非常有用。使用 sudo 运行命令：</p>
+    <pre>
+      <code># sudo /etc/init.d/dhcpd restart            # 用 root 权限运行 rc 脚本
+# sudo -u sysadmin whoami                   # 使用其他用户运行命令</code>
+    </pre>
+    <h2 id="%E9%85%8D%E7%BD%AE">配置</h2>
+    <p>Sudo 的配置在 <code>/etc/sudoers</code> 中，并且只能用 <code>visudo</code> 编辑。其基本语法是(列表是以逗号分隔的)：</p>
+    <pre>
+      <code>user hosts = (runas) commands          # 在 /etc/sudoers 中</code>
+    </pre>
+    <ul>
+      <li>
+        <p><code>users</code> 一个或多个用户或是%用户组(像 %wheel) 来获得权限</p>
+      </li>
+      <li>
+        <p><code>hosts</code> 主机列表(或 ALL)</p>
+      </li>
+      <li>
+        <p><code>runas</code> 列出用户以何种身份(或 ALL)来执行命令，放在 ( ) 内！</p>
+      </li>
+      <li>
+        <p><code>commands</code> 列出可被 users 以 runas 或 root 权限运行的命令(或 ALL)</p>
+      </li>
+    </ul>
+    <p>另外一些关键字可以定义别名，他们是 User_Alias, Host_Alias, Runas_Alias 和 Cmnd_Alias。这对于一些较大的设置比较有用。下面是 sudoers 例子：</p>
+    <pre>
+      <code># cat /etc/sudoers
+# 主机别名
+Host_Alias   DMZ     = 212.118.81.40/28
+Host_Alias   DESKTOP = work1, work2
+# 用户别名 和 runas 别名
+User_Alias   ADMINS  = colin, luca, admin
+User_Alias   DEVEL   = joe, jack, julia
+Runas_Alias  DBA     = oracle,pgsql
+# 命令别名，其值为全路径命令
+Cmnd_Alias   SYSTEM  = /sbin/reboot,/usr/bin/kill,/sbin/halt,/sbin/shutdown,/etc/init.d/
+Cmnd_Alias   PW      = /usr/bin/passwd [A-z]*, !/usr/bin/passwd root # Not root pwd!
+Cmnd_Alias   DEBUG   = /usr/sbin/tcpdump,/usr/bin/wireshark,/usr/bin/nmap
+
+# 一个真实的规则
+root,ADMINS  ALL     = (ALL) NOPASSWD: ALL    # ADMINS 别名中的用户可做任何事情不需要密码
+DEVEL        DESKTOP = (ALL) NOPASSWD: ALL    # 开发人员可在 DESKTOP 别名的主机上做任何事情
+DEVEL        DMZ     = (ALL) NOPASSWD: DEBUG  # 开发人员可以在 DMZ 别名的主机上使用 DEBUG 别名中的命令
+
+# 用户 sysadmin 可以在 DMZ 服务器上执行一些命令
+sysadmin     DMZ     = (ALL) NOPASSWD: SYSTEM,PW,DEBUG
+sysadmin     ALL,!DMZ = (ALL) NOPASSWD: ALL   # 可以在非 DMZ 主机上做任何事情
+%dba         ALL     = (DBA) ALL              # 用户组 dba 可以运行 DBA 别名中用户权限的所有命令
+# 所有用户可以在 DESKTOP 别名的主机上 挂载/卸载 CD-ROM
+ALL          DESKTOP = NOPASSWD: /sbin/mount /cdrom,/sbin/umount /cdrom</code>
+    </pre>
+  </body>
+</html>

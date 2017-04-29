@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <h2 id="%E5%88%97%E5%87%BA%E5%B7%B2%E5%AE%89%E8%A3%85%E8%BF%87%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8C%85">列出已安装过的软件包</h2>
+    <pre>
+      <code># rpm -qa                            # 列出已安装过的软件包(RH, SuSE, 基于 RPM 的)
+# dpkg -l                            # Debian, Ubuntu
+# pkg_info                           # 列出所有已安装过的软件包(FreeBSD)
+# pkg_info -W smbd                   # 查看 smbd 安装了那些软件包(FreeBSD)
+# pkginfo                            # Solaris</code>
+    </pre>
+    <h2 id="%E6%B7%BB%E5%8A%A0%2F%E5%88%A0%E9%99%A4%E8%BD%AF%E4%BB%B6">添加/删除软件</h2>
+    <p>前端界面：SuSE 为 yast2/yast，Red Hat 为 redhat-config-packages。</p>
+    <pre>
+      <code># rpm -i pkgname.rpm                 # 安装软件包(RH, SuSE, 基于 RPM 的)
+# rpm -e pkgname                     # 删除软件包</code>
+    </pre>
+    <h3 id="debian">Debian</h3>
+    <pre>
+      <code># apt-get update                     # 更新源列表
+# apt-get install emacs              # 安装 emacs 软件包
+# dpkg --remove emacs                # 删除 emacs 软件包
+# dpkg -S file                       # 查找拥有该 file 的软件包</code>
+    </pre>
+    <h3 id="gentoo">Gentoo</h3>
+    <p>Gentoo 使用 emerge 作为 "Portage" 软件包管理系统的核心。</p>
+    <pre>
+      <code># emerge --sync                      # 同步更新本地 protage 树
+# emerge -u packagename              # 安装或更新一个软件包
+# emerge -C packagename              # 删除软件包
+# revdep-rebuild                     # 修复依赖关系的缺失</code>
+    </pre>
+    <h3 id="solaris-4">Solaris</h3>
+    <cdrom> 路径通常为 `/cdrom/cdrom0`.
+
+    # pkgadd -d <cdrom>/Solaris_9/Product SUNWgtar
+    # pkgadd -d SUNWgtar                 # 添加下载的软件包(先要 bunzip2)
+    # pkgrm SUNWgtar                     # 删除软件包
+
+### FreeBSD
+
+    # pkg_add -r rsync                   # 获取并安装 rsync
+    # pkg_delete /var/db/pkg/rsync-xx    # 删除 rsync 软件包
+
+可使用 `PACKAGESITE` 环境变量来设置哪里可以获取软件包。举个例子：
+
+    # export PACKAGESITE=ftp://ftp.freebsd.org/pub/FreeBSD/ports/i386/packages/Latest/ 
+    # or ftp://ftp.freebsd.org/pub/FreeBSD/ports/i386/packages-6-stable/Latest/
+
+### FreeBSD ports
+
+Port 树 `/usr/ports/` 是一个准备编译和安装的软件集。可用 `portsnap` 工具来跟新 port。
+
+    # portsnap fetch extract             # 当第一次运行这个命令，会创建 port 树
+    # portsnap fetch update              # 跟新 port 树
+    # cd /usr/ports/net/rsync/           # 选择软件安装目录
+    # make install distclean             # 安装并清理(也可看 man ports)
+    # make package                       # Make 一个二进制软件包
+
+## 库路径
+
+由于复杂的依赖关系和运行时链接，程序难于分发或拷贝到其他系统。不过对于较少依赖关系的小程序，缺失的库可被拷贝过去。运行时库(即缺失的库)可用 `ldd` 和 `ldconfig` 来检查和管理。
+
+    # ldd /usr/bin/rsync                 # 列出所有所需的运行时库
+    # ldconfig -n /path/to/libs/         # 添加一个路径到共享库目录Add a path to the shared libraries directories
+    # ldconfig -m /path/to/libs/         # FreeBSD
+    # LD_LIBRARY_PATH                    # 设置连接库路径的环境变量</cdrom></cdrom>
+  </body>
+</html>

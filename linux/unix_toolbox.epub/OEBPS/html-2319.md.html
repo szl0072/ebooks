@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <h2 id="%E8%B0%83%E8%AF%95+%28%E4%B9%9F%E5%8F%AF%E7%9C%8B%5B%E6%B5%81%E9%87%8F%E5%88%86%E6%9E%90%29%5D%28http%3A%2F%2Fcb.vu%2Funixtoolbox_zh_cn.xhtml%23traffic%29">调试 (也可看<a href="http://cb.vu/unixtoolbox_zh_CN.xhtml#traffic">流量分析)</a></h2>
+    <h2 id="linux-11">Linux</h2>
+    <pre>
+      <code># ethtool eth0              
+# 显示以太网状态(replaces mii-diag)
+# ethtool -s eth0 speed 100 duplex full 
+# 把网卡 eth0 速度改为 100兆/秒，采用全双工
+# ethtool -s eth0 autoneg off 
+# 禁用自动协商模式
+# ethtool -p eth1           
+# 闪烁网络接口 LED 灯 - 如果支持的话，非常实用
+# ip link show              
+# 在 Linux 上显示所有网络接口(同 ifconfig 类似)
+# ip link set eth0 up       
+# 使设备激活(或Down掉)。同 "ifconfig eth0 up"
+# ip addr show              
+# 在 Linux 上显示所有 IP 地址(与 ifconfig 类似)
+# ip neigh show             
+# 与 arp -a 类似</code>
+    </pre>
+    <h2 id="%E5%85%B6%E4%BB%96%E7%B3%BB%E7%BB%9F">其他系统</h2>
+    <pre>
+      <code># ifconfig fxp0             
+# 查看 "media" 字段(FreeBSD)
+# arp -a                    
+# 查看路由(或主机) ARP 条目(所有系统)
+# ping cb.vu                
+# 第一个要试的事情...
+# traceroute cb.vu          
+# 列印到目的地的路由路径
+# ifconfig fxp0 media 100baseTX mediaopt full-duplex 
+# 100兆/秒 全双工(FreeBSD)
+# netstat -s                
+# 对每个网络协议做系统级分析</code>
+    </pre>
+    <p>另一些命令，虽然不总是默认安装，但很好找：</p>
+    <pre>
+      <code># arping 192.168.16.254     
+# 在网络层上 Ping
+# tcptraceroute -f 5 cb.vu  
+# 使用 tcp 替换 icmp 来跟踪，透过防火墙</code>
+    </pre>
+    <h2 id="%E8%B7%AF%E7%94%B1">路由</h2>
+    <h3 id="%E5%88%97%E5%8D%B0%E8%B7%AF%E7%94%B1%E8%A1%A8">列印路由表</h3>
+    <pre>
+      <code># route -n                  
+# Linux 或使用 "ip route"
+# netstat -rn               
+# Linux, BSD 和 UNIX# route print               
+# Windows</code>
+    </pre>
+    <h3 id="%E6%B7%BB%E5%8A%A0%E5%88%A0%E9%99%A4%E8%B7%AF%E7%94%B1">添加删除路由</h3>
+    <h4 id="freebsd-12">FreeBSD</h4>
+    <pre>
+      <code># route add 212.117.0.0/16 192.168.1.1
+# route delete 212.117.0.0/16
+# route add default 192.168.1.1</code>
+    </pre>
+    <p>永久的添加路由可在 /etc/rc.conf 配置文件中设置</p>
+    <pre>
+      <code>static_routes="myroute"
+route_myroute="-net 212.117.0.0/16 192.168.1.1"</code>
+    </pre>
+    <h4 id="linux-12">Linux</h4>
+    <pre>
+      <code># route add -net 192.168.20.0 netmask 255.255.255.0 gw 192.168.16.254
+# ip route add 192.168.20.0/24 via 192.168.16.254       
+# 等同于上面命令# route add -net 192.168.20.0 netmask 255.255.255.0 dev eth0
+# route add default gw 192.168.51.254
+# ip route add default via 192.168.51.254 dev eth0      
+# 等同于上面命令
+# route delete -net 192.168.20.0 netmask 255.255.255.0</code>
+    </pre>
+    <h4 id="solaris-1">Solaris</h4>
+    <pre>
+      <code># route add -net 192.168.20.0 -netmask 255.255.255.0 192.168.16.254
+# route add default 192.168.51.254 1                   
+# 1 = 通过此路由跳数减 1
+# route change default 192.168.50.254 1</code>
+    </pre>
+    <p>永久条目配置在 <code>/etc/defaultrouter</code> 中。</p>
+    <h4 id="windows">Windows</h4>
+    <pre>
+      <code># Route add 192.168.50.0 mask 255.255.255.0 192.168.51.253
+# Route add 0.0.0.0 mask 0.0.0.0 192.168.51.254</code>
+    </pre>
+    <p>使用 <code>add -p</code> 来是路由设置永久有效。</p>
+    <h3 id="%E9%85%8D%E7%BD%AE%E9%A2%9D%E5%A4%96%E7%9A%84+ip+%E5%9C%B0%E5%9D%80">配置额外的 IP 地址</h3>
+    <h3 id="linux-13">Linux</h3>
+    <pre>
+      <code># ifconfig eth0 192.168.50.254 netmask 255.255.255.0       
+# 第一个 IP
+# ifconfig eth0:0 192.168.51.254 netmask 255.255.255.0     
+# 第二个 IP
+# ip addr add 192.168.50.254/24 dev eth0                   
+# 等价命令
+# ip addr add 192.168.51.254/24 dev eth0 label eth0:1</code>
+    </pre>
+    <h3 id="freebsd-13">FreeBSD</h3>
+    <pre>
+      <code># ifconfig fxp0 inet 192.168.50.254/24                     
+# 第一个 IP
+# ifconfig fxp0 alias 192.168.51.254 netmask 255.255.255.0 
+# 第二个 IP</code>
+    </pre>
+    <p>永久条目设置在 /etc/rc.conf 中</p>
+    <pre>
+      <code>ifconfig_fxp0="inet 192.168.50.254  netmask 255.255.255.0"
+ifconfig_fxp0_alias0="192.168.51.254 netmask 255.255.255.0"</code>
+    </pre>
+    <h3 id="solaris-2">Solaris</h3>
+    <p>用 <code>ifconfig -a</code> 命令检查设置</p>
+    <pre>
+      <code># ifconfig hme0 plumb                                      
+# 启用网卡
+# ifconfig hme0 192.168.50.254 netmask 255.255.255.0 up    
+# 第一个 IP
+# ifconfig hme0:1 192.168.51.254 netmask 255.255.255.0 up  
+# 第二个 IP</code>
+    </pre>
+    <h2 id="%E6%9B%B4%E6%94%B9+mac+%E5%9C%B0%E5%9D%80">更改 MAC 地址</h2>
+    <p>通常在你更改之前先停下网络接口。不要告诉我为什么你想改变 MAC 地址......</p>
+    <pre>
+      <code># ifconfig eth0 down
+# ifconfig eth0 hw ether 00:01:02:03:04:05      
+# Linux
+# ifconfig fxp0 link 00:01:02:03:04:05          
+# FreeBSD
+# ifconfig hme0 ether 00:01:02:03:04:05         
+# Solaris
+# sudo ifconfig en0 ether 00:01:02:03:04:05     
+# Mac OS X Tiger
+# sudo ifconfig en0 lladdr 00:01:02:03:04:05    
+# Mac OS X Leopard</code>
+    </pre>
+    <p>对于 Windows 已经有许多工具了。像 <a href="http://ntsecurity.nu/toolbox/etherchange/">etherchange</a>。或者看看 "Mac Makeup", "smac"。</p>
+    <h2 id="%E4%BD%BF%E7%94%A8%E4%B8%AD%E7%9A%84%E7%AB%AF%E5%8F%A3">使用中的端口</h2>
+    <p>监听打开的端口：</p>
+    <pre>
+      <code># netstat -an | grep LISTEN
+# lsof -i                                       
+# 列出所有因特网连接(Linux)
+# socklist                                      
+# 列出打开的 socket (Linux)
+# sockstat -4                                   
+# 使用 socket 的应用程序列表(FreeBSD)
+# netstat -anp --udp --tcp | grep LISTEN        
+# Linux
+# netstat -tup                                  
+# 列出活跃的连接(Linux)
+# netstat -tupl                              
+# 列出系统中正在监听的端口(Linux)
+# netstat -ano                                  
+# Windows</code>
+    </pre>
+    <h2 id="%E9%98%B2%E7%81%AB%E5%A2%99">防火墙</h2>
+    <p>检查正在运行的防火墙(只是典型配置)：</p>
+    <h3 id="linux-14">Linux</h3>
+    <pre>
+      <code># iptables -L -n -v                  
+# 状态信息Open the iptables firewall
+# iptables -P INPUT       ACCEPT     
+# 打开所有
+# iptables -P FORWARD     ACCEPT
+# iptables -P OUTPUT      ACCEPT
+# iptables -Z                        
+# 把所有链的包及字节的计数器清空
+# iptables -F                        
+# 清空所有链
+# iptables -X                        
+# 删除所有链</code>
+    </pre>
+    <h3 id="freebsd-14">FreeBSD</h3>
+    <pre>
+      <code># ipfw show                          
+# 状态信息
+# ipfw list 65535 
+# 如果显示 "65535 deny ip from any to any"，那防火墙已被禁用
+# sysctl net.inet.ip.fw.enable=0     
+# 禁用# sysctl net.inet.ip.fw.enable=1     
+# 启用</code>
+    </pre>
+    <h3 id="%E8%B7%AF%E7%94%B1+ip+%E8%BD%AC%E5%8F%91">路由 IP 转发</h3>
+    <h3 id="linux-15">Linux</h3>
+    <p>查看然后启用 IP 转发：</p>
+    <pre>
+      <code># cat /proc/sys/net/ipv4/ip_forward     
+# 查看 IP 转发 0=禁用, 1=启用
+# echo 1 &gt; /proc/sys/net/ipv4/ip_forward</code>
+    </pre>
+    <p>或者编辑 /etc/sysctl.conf：</p>
+    <pre>
+      <code>net.ipv4.ip_forward = 1</code>
+    </pre>
+    <h3 id="freebsd-15">FreeBSD</h3>
+    <p>查看并启用：</p>
+    <pre>
+      <code># sysctl net.inet.ip.forwarding          
+# 查看 IP 转发 0=禁用, 1=启用
+# sysctl net.inet.ip.forwarding=1
+# sysctl net.inet.ip.fastforwarding=1    
+# 专用路由器或防火墙Permanent with entry in /etc/rc.conf:
+gateway_enable="YES"                     
+# 如果主机是网关则设置为 YES。</code>
+    </pre>
+    <h3 id="solaris-3">Solaris</h3>
+    <pre>
+      <code># ndd -set /dev/ip ip_forwarding 1       
+# 查看 IP 转发 0=禁用, 1=启用</code>
+    </pre>
+    <h3 id="nat+-+%E7%BD%91%E7%BB%9C%E5%9C%B0%E5%9D%80%E8%BD%AC%E6%8D%A2">NAT - 网络地址转换</h3>
+    <h3 id="linux-16">Linux</h3>
+    <pre>
+      <code># iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE  
+# 激活 NAT# iptables -t nat -A PREROUTING -p tcp -d 78.31.70.238 --dport 20022 -j DNAT \
+--to 192.168.16.44:22           
+# 转发端口 20022 到内部 IP 端口(ssh)# iptables -t nat -A PREROUTING -p tcp -d 78.31.70.238 --dport 993:995 -j DNAT \
+--to 192.168.16.254:993:995     
+# 转发 993-995 范围端口
+# ip route flush cache
+# iptables -L -t nat            
+# 查看 NAT 状态信息</code>
+    </pre>
+    <p>使用 -D 替换 -A 来删除端口转发。</p>
+    <h3 id="freebsd-16">FreeBSD</h3>
+    <pre>
+      <code># natd -s -m -u -dynamic -f /etc/natd.conf -n fxp0
+Or edit /etc/rc.conf with:
+firewall_enable="YES"           
+# 设置 YES 来启用防火墙功能firewall_type="open"            
+# 防火墙类型(看 /etc/rc.firewall)natd_enable="YES"               
+# 启用 natd (如果 firewall_enable == YES)。natd_interface="tun0"           
+# 公共的网络接口或要使用的 IP 地址。natd_flags="-s -m -u -dynamic -f /etc/natd.conf"</code>
+    </pre>
+    <p>端口转发：</p>
+    <pre>
+      <code># cat /etc/natd.conf 
+same_ports yes
+use_sockets yes
+unregistered_only
+# redirect_port tcp insideIP:2300-2399 3300-3399  
+# 端口范围redirect_port udp 192.168.51.103:7777 7777</code>
+    </pre>
+    <h3 id="dns">DNS</h3>
+    <p>在 unix 上，对于所有的网络接口的 DNS 条目都存储在 /etc/resolv.conf 文件中。主机域也储存在这个文件中。最小化配置如下：</p>
+    <pre>
+      <code>nameserver 78.31.70.238
+search sleepyowl.net intern.lab
+domain sleepyowl.net</code>
+    </pre>
+    <p>检查系统域名：</p>
+    <pre>
+      <code># hostname -d                        
+# 等同于 dnsdomainname</code>
+    </pre>
+    <h3 id="windows-1">Windows</h3>
+    <p>在 Windows 上，DNS 配置于每个网络接口。要显示配置的 DNS 和清空 DNS 缓存可是使用：</p>
+    <pre>
+      <code># ipconfig /?                        
+# 显示帮助
+# ipconfig /all                      
+# 显示所有信息包括 DNS
+# ipconfig /flushdns                 
+# 清除 DNS 缓存</code>
+    </pre>
+    <h3 id="%E8%BD%AC%E5%8F%91%E6%9F%A5%E8%AF%A2">转发查询</h3>
+    <p>Dig 是你测试 DNS 设置的好朋友。举个例子，用于测试的 DNS 服务器为 <code>213.133.105.2 ns.second-ns.de</code>。查看哪个服务器客户端接收应答(简单应答).</p>
+    <pre>
+      <code># dig sleepyowl.net
+sleepyowl.net.          600     IN      A       78.31.70.238
+;; SERVER: 192.168.51.254
+#53(192.168.51.254)</code>
+    </pre>
+    <p>路由器 192.168.51.254 应答了，并返回了一条 A 条目(记录)。任何条目都可查询，DNS 服务器可用 @ 来选定：</p>
+    <pre>
+      <code># dig MX google.com
+# dig @127.0.0.1 NS sun.com          
+# 测试本地服务器# dig @204.97.212.10 NS MX heise.de  
+# 查询外部# dig AXFR @ns1.xname.org cb.vu      
+# 查看区传送(zone transfer)</code>
+    </pre>
+    <p>程式 host 也很强大。</p>
+    <pre>
+      <code># host -t MX cb.vu                   
+# 获取邮件 MX 记录# host -t NS -T sun.com              
+# 通过 TCP 连接获取 NS 记录# host -a sleepyowl.net              
+# 获取所有</code>
+    </pre>
+    <h3 id="%E5%8F%8D%E5%90%91%E6%9F%A5%E8%AF%A2">反向查询</h3>
+    <p>查找属于一个 IP 地址(in-addr.arpa.)的域名。可用 <code>dig</code>, <code>host</code> 和 <code>nslookup</code> 命令查询：</p>
+    <pre>
+      <code># dig -x 78.31.70.238
+# host 78.31.70.238
+# nslookup 78.31.70.238</code>
+    </pre>
+    <h3 id="%2Fetc%2Fhosts">/etc/hosts</h3>
+    <p>单个主机可以配置于文件 /etc/hosts 来代替本地正在运行的 <code>named</code> 反向域名查询。格式很简单，举个例子：</p>
+    <pre>
+      <code>78.31.70.238   sleepyowl.net   sleepyowl</code>
+    </pre>
+    <p>对于 hosts 文件和 DNS 查询之间的优先级，可在 <code>/etc/nsswitch.conf</code> 和 <code>/etc/host.conf</code> 中配置 order 名称解析。这个文件同样存在于 Windows 上，通常在：</p>
+    <pre>
+      <code>C:\WINDOWS\SYSTEM32\DRIVERS\ETC</code>
+    </pre>
+    <h3 id="dhcp">DHCP</h3>
+    <h3 id="linux-17">Linux</h3>
+    <p>一些发行版(SuSE)使用 dhcpcd 作为客户端。默认网络接口是 eth0。</p>
+    <pre>
+      <code># dhcpcd -n eth0           
+# 触发更新(并不总是可以工作)
+# dhcpcd -k eth0           
+# 释放并关闭</code>
+    </pre>
+    <p>租约(lease)的全部信息存储在：</p>
+    <pre>
+      <code>/var/lib/dhcpcd/dhcpcd-eth0.info</code>
+    </pre>
+    <h3 id="freebsd-17">FreeBSD</h3>
+    <p>FreeBSD (和 Debian) 使用 <code>dhclient</code>。要配置一个网络接口(如：bge0)运行：</p>
+    <pre>
+      <code># dhclient bge0</code>
+    </pre>
+    <p>租约(lease)的全部信息存储在：</p>
+    <pre>
+      <code>/var/db/dhclient.leases.bge0</code>
+    </pre>
+    <p>使用</p>
+    <pre>
+      <code>/etc/dhclient.conf</code>
+    </pre>
+    <p>设置 prepend 选项或强制不同的选项：</p>
+    <pre>
+      <code># cat /etc/dhclient.conf
+interface "rl0" {
+    prepend domain-name-servers 127.0.0.1;
+    default domain-name "sleepyowl.net";
+    supersede domain-name "sleepyowl.net";
+}</code>
+    </pre>
+    <h3 id="windows-2">Windows</h3>
+    <p>dhcp 租约(lease)使用 <code>ipconfig</code> 来更新：</p>
+    <pre>
+      <code># ipconfig /renew          
+# 更新所有适配器# ipconfig /renew LAN      
+# 更新名叫 "LAN" 的适配器# ipconfig /release WLAN   
+# 释放名叫 "WLAN" 的适配器</code>
+    </pre>
+    <p>是的，这是一个使用简单名称重新命名你的适配器的好主意！</p>
+    <h3 id="%E9%80%9A%E4%BF%A1%E9%87%8F%E5%88%86%E6%9E%90%28traffic+analysis%29">通信量分析(Traffic analysis)</h3>
+    <p><a href="http://people.suug.ch/~tgr/bmon/">Bmon</a> 是一个小的流量监控控制台，而且可以显示不同的网络接口的流量。</p>
+    <h3 id="%E7%94%A8+tcpdump+%E5%97%85%E6%8E%A2%28sniff%29">用 tcpdump 嗅探(sniff)</h3>
+    <pre>
+      <code># tcpdump -nl -i bge0 not port ssh and src \(192.168.16.121 or 192.168.16.54\)
+# tcpdump -l &gt; dump &amp;&amp; tail -f dump               
+# 缓冲输出# tcpdump -i rl0 -w traffic.rl0                   
+# 把数据报文写入二进制文件
+# tcpdump -r traffic.rl0                          
+# 从文件读取数据报文(也可以使用 ethereal)
+# tcpdump port 80                                 
+# 两个经典命令# tcpdump host google.com
+# tcpdump -i eth0 -X port \(110 or 143\)          
+# 查看端口 110(POP) 或 143(IMAP)的数据报文
+# tcpdump -n -i eth0 icmp                         
+# 只捕获 ping
+# tcpdump -i eth0 -s 0 -A port 80 | grep GET      
+# -s 0 为全部包, -A 为 ASCII</code>
+    </pre>
+    <p>另一些重要选项：</p>
+    <ul>
+      <li>
+        <p><code>-A</code>     显示每个包清晰文本(除了报头)</p>
+      </li>
+      <li>
+        <p><code>-X</code>     显示包的 ASCII 文本</p>
+      </li>
+      <li>
+        <p><code>-l</code>     使标准输出变为缓冲行形式</p>
+      </li>
+      <li><code>-D</code>     显示所有可用网络接口</li>
+    </ul>
+    <p>对于 Windows 可以使用 <a href="http://www.winpcap.org/">www.winpcap.org</a>。使用 windump -D 来列出网络接口。</p>
+    <h2 id="%E7%94%A8+nmap+%E6%89%AB%E6%8F%8F">用 nmap 扫描</h2>
+    <p><a href="http://insecure.org/nmap/">Nmap</a> 是一个用于 OS 探测的端口扫描工具，她通常在许多发行版上有安装，并且同样可用于 Windows。如果你不扫描你的服务器，骇客们会为你做这些...</p>
+    <pre>
+      <code># nmap cb.vu               
+# 扫描主机上所有保留的 TCP 端口
+# nmap -sP 192.168.16.0/24 
+# 找出在 0/24 上主机所使用的 IP
+# nmap -sS -sV -O cb.vu    
+# 做秘密 SYN 扫描来探测系统和系统服务的版本信息
+
+PORT      STATE  SERVICE             VERSION
+22/tcp    open   ssh                 OpenSSH 3.8.1p1 FreeBSD-20060930 (protocol 2.0)
+25/tcp    open   smtp                Sendmail smtpd 8.13.6/8.13.6
+80/tcp    open   http                Apache httpd 2.0.59 ((FreeBSD) DAV/2 PHP/4.
+[...]
+Running: FreeBSD 5.X
+Uptime 33.120 days (since Fri Aug 31 11:41:04 2007)</code>
+    </pre>
+    <p>其他非标准但好用的工具有 <code>hping</code> (www.hping.org)，她是一个 IP 分组组装/分析器，和 <code>fping</code> (fping.sourceforge.net)。fping 可以在一个循环队列(round-robin fashion)中扫描多种主机。</p>
+    <h2 id="%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6%28qos%29">流量控制(QoS)</h2>
+    <p>流量控制管理着一个网络的队列、流量监控、调度以及其他流量设置(traffic parameters)。以下简单实用的示例使用 Linux 和 FreeBSD 的能力来更好的利用带宽。</p>
+    <h3 id="%E4%B8%8A%E4%BC%A0%E9%99%90%E5%88%B6">上传限制</h3>
+    <p>DSL 或有线调制解调器有一个很长的列队来提高上传吞吐量(upload throughput)。然而用一个快速的设备(如以太网)填充这个列队将大大减少交互性。这就是限制设备上传速度有用的原因，以匹配调制解调器的实际能力，这可以有效提高交互性。设置大约为 modem 最大速度的 90%。</p>
+    <h4 id="linux-18">Linux</h4>
+    <p>给 512K 上传速度的 modem。</p>
+    <pre>
+      <code># tc qdisc add dev eth0 root tbf rate 480kbit latency 50ms burst 1540
+# tc -s qdisc ls dev eth0                         
+# 状态
+# tc qdisc del dev eth0 root                      
+# 删除队列
+# tc qdisc change dev eth0 root tbf rate 220kbit latency 50ms burst 1540</code>
+    </pre>
+    <h4 id="freebsd-18">FreeBSD</h4>
+    <p>FreeBSD 使用 <code>dummynet</code> 来控制带宽，其配置工具为 ipfw。Pipe 用来设置限制带宽的单位[K|M]{比特/秒|字节/秒}，0 意味着没有限制。使用同样的 pipe 数字可重新配置它。举个例子，限制上传带宽为 500K。</p>
+    <pre>
+      <code># kldload dummynet                                
+# 如有必要加载这个模块# ipfw pipe 1 config bw 500Kbit/s                 
+# 创建一个带宽限制的 pipe# ipfw add pipe 1 ip from me to any               
+# 转移所有上传进入这个 pipe</code>
+    </pre>
+    <h3 id="%E6%9C%8D%E5%8A%A1%E8%B4%A8%E9%87%8F+%28quality+of+service%29">服务质量 (Quality of service)</h3>
+    <h4 id="linux-19">Linux</h4>
+    <p>使用 <code>tc</code> 的优先级队列来优化 VoIP。在 <a href="http://www.voip-info.org/wiki-QoS+Linux+with+HFS">voip-info.org</a> 或 <a href="http://www.howtoforge.com/voip_qos_traffic_shaping_iproute2_asterisk">www.howtoforge.com</a> 上可以看到完整的例子。假设 VoIP 使用 UDP 端口 10000:11024 并且使用 eth0 设备(也可为 ppp0 或 so)。下列命令定义了三个队列，并且用 QoS <code>0x1e</code>(设置所有位) 强制 VOIP 流量到队列 1。默认流量流入队列 3，Qos <em>Minimize-Delay</em> 流入队列 2。</p>
+    <pre>
+      <code># tc qdisc add dev eth0 root handle 1: prio priomap 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 0
+# tc qdisc add dev eth0 parent 1:1 handle 10: sfq
+# tc qdisc add dev eth0 parent 1:2 handle 20: sfq
+# tc qdisc add dev eth0 parent 1:3 handle 30: sfq
+# tc filter add dev eth0 protocol ip parent 1: prio 1 u32 \
+  match ip dport 10000 0x3C00 flowid 1:1          # 使用服务端端口范围
+  match ip dst 123.23.0.1 flowid 1:1              # 或/和使用服务器 IP</code>
+    </pre>
+    <p>状态和移除：</p>
+    <pre>
+      <code># tc -s qdisc ls dev eth0                         
+# queue status# tc qdisc del dev eth0 root                      
+# delete all QoS</code>
+    </pre>
+    <h4 id="%E8%AE%A1%E7%AE%97%E7%AB%AF%E5%8F%A3%E8%8C%83%E5%9B%B4%E5%92%8C%E6%8E%A9%E7%A0%81+%28mask%29">计算端口范围和掩码 (mask)</h4>
+    <p>用你所计算的端口掩码来定义 tc 过滤器的端口范围。查询 2^N 端口范围结尾，推断范围并转换成十六进制。这就是你的掩码 (mask)。例如 10000 -&gt; 11024，它的范围是 1024。</p>
+    <pre>
+      <code># 2^13 (8192) &lt; 10000 &lt; 2^14 (16384)              
+# 结尾是 2^14 = 16384# echo "obase=16;(2^14)-1024" | bc                
+# 掩码是 0x3C00</code>
+    </pre>
+    <h4 id="freebsd-19">FreeBSD</h4>
+    <p>假设最大连接带宽为 500Kbit/s，我们使用优先级 100:10:1 定义 3 个队列给 VoIP:ssh:剩余所有。</p>
+    <pre>
+      <code># ipfw pipe 1 config bw 500Kbit/s 
+# ipfw queue 1 config pipe 1 weight 100
+# ipfw queue 2 config pipe 1 weight 10
+# ipfw queue 3 config pipe 1 weight 1
+# ipfw add 10 queue 1 proto udp dst-port 10000-11024
+# ipfw add 11 queue 1 proto udp dst-ip 123.23.0.1 # 或/和使用服务器 IP# ipfw add 20 queue 2 dsp-port ssh
+# ipfw add 30 queue 3 from me to any              # 剩余所有</code>
+    </pre>
+    <p>状态和移除：</p>
+    <pre>
+      <code># ipfw list                                       
+# 规则信息
+# ipfw pipe list                                  
+# 管道信息
+# ipfw flush                                      
+# 删除除默认外所有规则</code>
+    </pre>
+    <h3 id="nis+%E8%B0%83%E8%AF%95">NIS 调试</h3>
+    <p>一些可工作在已配置好的 NIS 客户端上的命令：</p>
+    <pre>
+      <code># ypwhich                  
+# 获取提供 NIS 服务的服务器名
+# domainname               
+# 已配置的 NIS 域名
+# ypcat group              
+# 列印 NIS 映射 group
+# cd /var/yp &amp;&amp; make       
+# 重建 yp 数据库</code>
+    </pre>
+    <p>ypbind 正在运行吗？</p>
+    <pre>
+      <code># ps auxww | grep ypbind
+/usr/sbin/ypbind -s -m -S servername1,servername2   
+# FreeBSD/usr/sbin/ypbind           
+# Linux# yppoll passwd.byname
+Map passwd.byname has order number 1190635041. Mon Sep 24 13:57:21 2007
+The master server is servername.domain.net.</code>
+    </pre>
+    <h3 id="linux-20">Linux</h3>
+    <pre>
+      <code># cat /etc/yp.conf
+ypserver servername
+domain domain.net broadcast</code>
+    </pre>
+  </body>
+</html>

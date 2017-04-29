@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <h2 id="less">less</h2>
+    <p><code>less</code> 命令用来在控制台中分屏显示文本文档。它在许多发行版中可用。    </p>
+    <pre>
+      <code># less unixtoolbox.xhtml
+</code>
+    </pre>
+    <p>一些重要指令(^N 代表 [control]-[N])：</p>
+    <ul>
+      <li>
+        <p><strong>h H</strong>       显示指令的汇总列表</p>
+      </li>
+      <li>
+        <p><strong>f ^F ^V SPACE</strong>       向前滚动一屏(或者 N 行)</p>
+      </li>
+      <li>
+        <p><strong>b ^B ESC-v</strong>       向后滚动一屏(或者 N 行)</p>
+      </li>
+      <li>
+        <p><strong>F</strong>       向前滚动；类似于"tail -f"</p>
+      </li>
+      <li>
+        <p><strong>/pattern</strong>       向前搜索匹配该模式的行</p>
+      </li>
+      <li>
+        <p><strong>?pattern</strong>       向后搜索匹配该模式的行</p>
+      </li>
+      <li>
+        <p><strong>n</strong>       重复之前的搜索</p>
+      </li>
+      <li>
+        <p><strong>N</strong>       反方向重复之前的搜索</p>
+      </li>
+      <li>
+        <p><strong>q</strong>       退出</p>
+      </li>
+    </ul>
+    <h2 id="vi">vi</h2>
+    <p>Vi 在任何 Linux/Unix 发行安装版(gentoo 没有?)上都存在。因此，我们有必要了解一些基本的命令。Vi 有两个模式：命令模式和插入模式。使用 <strong>[ESC]</strong> 键可进入命令模式，使用 <strong>i</strong> 键可进入插入模式。如果你迷失了，可在命令模式下键入 <code>: help</code>。<br/>
+编辑器 <code>nano</code> 和 <code>pico</code> 通常也都可用，而且更容易(IMHO)使用。</p>
+    <h3 id="quit">Quit</h3>
+    <ul>
+      <li>
+        <p><strong>:w</strong> newfilename       保存文件为 newfilename</p>
+      </li>
+      <li>
+        <p><strong>:wq or :x</strong>       保存并退出</p>
+      </li>
+      <li>
+        <p><strong>:q!</strong>       退出但不保存</p>
+      </li>
+    </ul>
+    <h3 id="%E7%A7%BB%E5%8A%A8%E5%92%8C%E6%9F%A5%E6%89%BE">移动和查找</h3>
+    <ul>
+      <li>
+        <p><strong>/string</strong>       向前查找 string</p>
+      </li>
+      <li>
+        <p><strong>?string</strong>       向后查找 string</p>
+      </li>
+      <li>
+        <p><strong>n</strong>       同方向重复上一次搜索命令</p>
+      </li>
+      <li>
+        <p><strong>N</strong>       反方向重复上一次搜索命令</p>
+      </li>
+      <li>
+        <p><strong>{</strong>       光标移至段落结尾</p>
+      </li>
+      <li>
+        <p><strong>}</strong>       光标移至段落开头</p>
+      </li>
+      <li>
+        <p><strong>1G</strong>       光标移至文件的第一行首</p>
+      </li>
+      <li>
+        <p><strong>nG</strong>       光标移至文件的第 n 行首</p>
+      </li>
+      <li>
+        <p><strong>G</strong>       光标移至文件的最后一行首</p>
+      </li>
+      <li>
+        <p><strong>:%s/OLD/NEW/g</strong>       替换所有查找到的 OLD 为 NEW</p>
+      </li>
+    </ul>
+    <h3 id="%E5%88%A0%E9%99%A4%E6%96%87%E6%9C%AC">删除文本</h3>
+    <ul>
+      <li>
+        <p><strong>dd</strong>       删除当前行</p>
+      </li>
+      <li>
+        <p><strong>D</strong>       删除光标到当前行末尾的字符</p>
+      </li>
+      <li>
+        <p><strong>dw</strong>       删除单词</p>
+      </li>
+      <li>
+        <p><strong>x</strong>       删除字符</p>
+      </li>
+      <li>
+        <p><strong>u</strong>       回复上一次操作</p>
+      </li>
+      <li>
+        <p><strong>U</strong>       回复所有此行的更改</p>
+      </li>
+    </ul>
+    <h2 id="mail">mail</h2>
+    <p><code>mail</code> 命令是一个读取和发送邮件的应用程序，她通常已安装。要发送一封邮件，可以简单的输入 "mail user@domain"。其第一行为主题，然后是邮件内容。在一个新行中使用单个点(.)来结束并发送邮件。例子：   </p>
+    <pre>
+      <code># mail c@cb.vu
+Subject: Your text is full of typos
+"For a moment, nothing happened. Then, after a second or so, 
+nothing continued to happen."
+.
+EOT
+#</code>
+    </pre>
+    <p>这同样可用于管道：   </p>
+    <pre>
+      <code># echo "This is the mail body" | mail c@cb.vu
+</code>
+    </pre>
+    <p>也是测试邮件服务器的简单方法。</p>
+    <h2 id="tar">tar</h2>
+    <p>命令 <code>tar</code> (磁带存档) 可以为文件和目录创建档案。归档文件 .tar 是未压缩的，一个压缩过的归档文件的后缀是 .tgz 或 .tar.gz (zip) 或者 .tbz (bzip2)。不要使用绝对路径建立一个归档文件，你可能要解开这个归档文件到某个地方。一些常用命令如下：</p>
+    <h3 id="%E5%88%9B%E5%BB%BA">创建</h3>
+    <pre>
+      <code># cd /
+# tar -cf home.tar home/        # 归档整个 /home 目录(c 为创建)
+# tar -czf home.tgz home/       # 等同于 zip 压缩
+# tar -cjf home.tbz home/       # 等同于 bzip2 压缩</code>
+    </pre>
+    <p>从一个目录树中只包含一个(或2个)目录，并保持相对目录结构。举个例子，/usr/local/etc 和 /usr/local/www，它们在归档文件中的第一层目录是 local/。</p>
+    <pre>
+      <code># tar -C /usr -czf local.tgz local/etc local/www
+# tar -C /usr -xzf local.tgz    # 释放 local 目录到 /usr
+# cd /usr; tar -xzf local.tgz   # 同上面一样</code>
+    </pre>
+    <h3 id="%E9%87%8A%E6%94%BE%28extract%29">释放(Extract)</h3>
+    <pre>
+      <code># tar -tzf home.tgz             # 列出归档文件中的所有文件，并不释放
+# tar -xf home.tar              # 释放归档文件(x 为释放)
+# tar -xzf home.tgz             # 等同于 zip 压缩
+# tar -xjf home.tgz             # 等同于 bzip2 压缩
+# tar -xjf home.tgz home/colin/file.txt    # 释放单个文件</code>
+    </pre>
+    <h3 id="%E6%9B%B4%E9%AB%98%E7%BA%A7%E7%9A%84">更高级的</h3>
+    <pre>
+      <code># tar c dir/ | gzip | ssh user@remote 'dd of=dir.tgz' # 归档压缩 dir/ 目录并存储到远程主机上
+# tar cvf - `find . -print` &gt; backup.tar              # 归档当前目录
+# tar -cf - -C /etc . | tar xpf - -C /backup/etc      # 拷贝目录
+# tar -cf - -C /etc . | ssh user@remote tar xpf - -C /backup/etc      # 远程拷贝
+# tar -czf home.tgz --exclude '*.o' --exclude 'tmp/' home/</code>
+    </pre>
+    <h2 id="dd">dd</h2>
+    <p>程序 <code>dd</code> (磁盘备份(disk dump) 或 destroy disk，也可看 <a href="http://roesler-ac.de/wolfram/acro/credits.htm">dd 的含义</a>) 用来拷贝分区、磁盘或者其它拷贝。通常这么用： </p>
+    <pre>
+      <code># dd if=&lt;source&gt; of=&lt;target&gt; bs=&lt;byte size&gt; conv=&lt;conversion&gt;
+</code>
+    </pre>
+    <p>重要的 conv 选项：</p>
+    <ul>
+      <li>
+        <p><code>notrunc</code>       不截短输出文件</p>
+      </li>
+      <li>
+        <p><code>noerror</code>       出错时不停止处理(e.g. 坏扇区)</p>
+      </li>
+      <li><code>sync</code>       把每个输入块填充到ibs个字节，不足部分用空(NUL)字符补齐</li>
+    </ul>
+    <p>默认字节大小为 512 (一个扇区)。MBR 处于磁盘的第一个扇区，之后的 63 个扇区是空的。较大的字节大小可以加快拷贝速度但也需要更多的内存。</p>
+    <h2 id="%E5%A4%87%E4%BB%BD%E5%92%8C%E6%81%A2%E5%A4%8D">备份和恢复</h2>
+    <pre>
+      <code># dd if=/dev/hda of=/dev/hdc bs=16065b                # 拷贝磁盘到磁盘(相同大小)
+# dd if=/dev/sda7 of /home/root.img bs=4096 conv=notrunc,noerror # 备份 /
+# dd if /home/root.img of=/dev/sda7 bs=4096 conv=notrunc,noerror # 恢复 /
+# dd bs=1M if=/dev/ad4s3e | gzip -c &gt; ad4s3e.gz                  # 压缩备份
+# gunzip -dc ad4s3e.gz | dd of=/dev/ad0s3e bs=1M                 # 解压恢复
+# dd bs=1M if=/dev/ad4s3e | gzip | ssh eedcoba@fry 'dd of=ad4s3e.gz' # 也可为远程的
+# gunzip -dc ad4s3e.gz | ssh eedcoba@host 'dd of=/dev/ad0s3e bs=1M'
+# dd if=/dev/ad0 of=/dev/ad2 skip=1 seek=1 bs=4k conv=noerror    # 忽略 MBR
+# 如果目标(ad2)比较小，这是必须的。</code>
+    </pre>
+    <h3 id="%E6%81%A2%E5%A4%8D">恢复</h3>
+    <p>该 <code>dd</code> 命令会读取分区的<em>每一个区块</em>，即所有区块。对于有问题的区块，最好使用 <code>conv=sync,noerror</code> 选项，dd 将会跳过坏的区块并入 0。因此，这就是设置块大小等于或小于磁盘块大小的重要性。1k 大小似乎安全，用 <code>bs=1k</code> 来设置它。假如一个磁盘有坏扇区并且有个分区的数据要恢复，那么用 dd 工具创建一个镜像文件，挂载这个镜像文件，然后拷贝内容到新的磁盘中。如果用了 <code>noerror</code> 选项，dd 会跳过坏扇区并写入 0，也即坏扇区中的内容会丢失。  </p>
+    <pre>
+      <code># dd if=/dev/hda of=/dev/null bs=1m                   # 检查坏扇区
+# dd bs=1k if=/dev/hda1 conv=sync,noerror,notrunc | gzip | ssh \ # 发送到远程
+root@fry 'dd of=hda1.gz bs=1k'
+# dd bs=1k if=/dev/hda1 conv=sync,noerror,notrunc of=hda1.img    # 存储为一个映像文件
+# mount -o loop /hda1.img /mnt                        # 挂载这个映像文件
+# rsync -ax /mnt/ /newdisk/                           # 拷贝到一个新磁盘
+# dd if=/dev/hda of=/dev/hda                          # 刷新磁状态
+  # 上面的命令对于刷新磁盘(refresh disk)很有用。这绝对安全，但必须先卸载磁盘。
+
+### 删除
+# dd if=/dev/zero of=/dev/hdc                         # 删除全部数据
+# dd if=/dev/urandom of=/dev/hdc                      # 更好的删除全部数据
+# kill -USR1 PID                                      # 查看 dd 进度(仅Linux!)</code>
+    </pre>
+    <h3 id="mbr+%E6%8A%80%E5%B7%A7">MBR 技巧</h3>
+    <p>MBR 包含了引导程序和分区表，它的大小为 512 字节。前 446 字节为引导程序，446 到 512 字节为分区表。    </p>
+    <pre>
+      <code># dd if=/dev/sda of=/mbr_sda.bak bs=512 count=1                  # 完全备份 
+MBR# dd if=/dev/zero of=/dev/sda bs=512 count=1                  # 删除 MBR 和分区表
+# dd if=/mbr_sda.bak of=/dev/sda bs=512 count=1                  # 完全恢复MBR
+# dd if=/mbr_sda.bak of=/dev/sda bs=446 count=1                  # 仅回复引导程序
+# dd if=/mbr_sda.bak of=/dev/sda bs=1 count=64 skip=446 seek=446 # 恢复分区表</code>
+    </pre>
+    <h2 id="screen">screen</h2>
+    <p>Screen 提供了两个主要功能：</p>
+    <ul>
+      <li>
+        <p>在一个终端内运行多个终端会话(terminal session)。</p>
+      </li>
+      <li>
+        <p>一个已启动的程序与运行它的真实终端分离的，因此可运行于后台。真实的终端可以被关闭，还可以在稍后再重新接上(reattached)。</p>
+      </li>
+    </ul>
+    <h3 id="%E7%AE%80%E7%9F%AD%E5%AE%9E%E4%BE%8B">简短实例</h3>
+    <p>开启 screen：  # screen</p>
+    <p>在 screen 会话中，我们可以开启一个长时间运行的程序(如 top)。Detach 这个终端，之后可以从其他机器 reattach 这个相同的终端(比如通过 ssh)。  # top</p>
+    <p>现在用 <strong>Ctrl-a Ctrl-d</strong> 来 detach。Reattach 终端： # screen -r</p>
+    <p>或更好的：   </p>
+    <pre>
+      <code># screen -R -D</code>
+    </pre>
+    <p>现在 attach 到这里。具体意思是：先试图恢复离线的 screen 会话。若找不到离线的 screen 会话，即建立新的 screen 会话给用户。</p>
+    <h3 id="screen+%E5%91%BD%E4%BB%A4+%28%E5%9C%A8+screen+%E4%B8%AD%29">Screen 命令 (在 screen 中)</h3>
+    <p>所有命令都以 <strong>Ctrl-a</strong> 开始。</p>
+    <ul>
+      <li>
+        <p><strong>Ctrl-a ?</strong> 各功能的帮助摘要</p>
+      </li>
+      <li>
+        <p><strong>Ctrl-a c</strong> 创建一个新的 window (终端)</p>
+      </li>
+      <li>
+        <p><strong>Ctrl-a Ctrl-n 和 Ctrl-a Ctrl-p</strong> 切换到下一个或前一个 window</p>
+      </li>
+      <li>
+        <p><strong>Ctrl-a Ctrl-N</strong> N 为 0 到 9 的数字，用来切换到相对应的 window</p>
+      </li>
+      <li>
+        <p><strong>Ctrl-a "</strong> 获取所有正在运行的 window 的可导航的列表</p>
+      </li>
+      <li>
+        <p><strong>Ctrl-a a</strong> 清楚错误的 Ctrl-a</p>
+      </li>
+      <li>
+        <p><strong>Ctrl-a Ctrl-d</strong> 断开所有会话，会话中所有任务运行于后台</p>
+      </li>
+      <li><strong>Ctrl-a x</strong> 用密码锁柱 screen 终端</li>
+    </ul>
+    <p>当程序内部运行终端关闭并且你登出该终端时，该 screen 会话就会被终止。</p>
+    <h2 id="find">Find</h2>
+    <p>一些重要选项：</p>
+    <ul>
+      <li>
+        <p><code>-x</code> (BSD) <code>-xdev</code> (Linux)       留于同一文件系统 (fstab 中的 dev)</p>
+      </li>
+      <li>
+        <p><code>-exec cmd {} \;</code>       执行命令并用全路径替换 {}</p>
+      </li>
+      <li>
+        <p><code>-iname</code>       同 -name 一样，但不区分大小写</p>
+      </li>
+      <li>
+        <p><code>-ls</code>       显示关于文件的信息(同 ls -la)</p>
+      </li>
+      <li>
+        <p><code>-size n</code>       n 为 +-n (k M G T P)</p>
+      </li>
+      <li><code>-cmin n</code>       查找系统中最后 n 分钟改变文件状态的文件</li>
+    </ul>
+    <pre>
+      <code># find . -type f ! -perm -444        # 寻找所有无法读取的文件
+# find . -type d ! -perm -111        # 寻找所有无法访问的目录
+# find /home/user/ -cmin 10 -print   # 寻找最后 10 分钟创建或修改的文件
+# find . -name '*.[ch]' | xargs grep -E 'expr' # 在当前目录及子目录搜索 'expr' 表达式
+# find / -name "*.core" | xargs rm   # 寻找 core 垃圾并删除它们(也可试试 core.*)
+# find / -name "*.core" -print -exec rm {} \;  # 另一种语法
+      # 寻找图像文件并创建一个归档文件，iname 为不区分大小写。-r 为附加
+      # find . \( -iname "*.png" -o -iname "*.jpg" \) -print -exec tar -rf images.tar {} \;      
+# find . -type f -name "*.txt" ! -name README.txt -print  # 除 README.txt 的文件
+# find /var/ -size +10M -exec ls -lh {} \;     # 查找 &gt; 10 MB 的文件
+# find /var/ -size +10M -ls           # 这个更简单
+# find . -size +10M -size -50M -print
+# find /usr/ports/ -name work -type d -print -exec rm -rf {} \;  # 清理 port
+      # 以 SUID 查找文件；这些文件很脆弱，必须保持安全。
+# find / -type f -user root -perm -4000 -exec ls -l {} \;
+
+小心 xarg 或 exec，因为当文件或目录中包含空格时可能会返回错误的结果。在有疑惑时用 "-print0 | xargs -0" 代替 "| xargs"。选项 -print0 必须在 find 命令的最后。看这个不错的[find 迷你教程](http://www.hccfl.edu/pollock/Unix/FindCmd.htm).    # find . -type f | xargs ls -l       # 不能工作于有空格的名字
+# find . -type f -print0 | xargs -0 ls -l  # 可工作于有空格的名字
+# find . -type f -exec ls -l '{}' \; # 或使用用于 -exec 的引用 '{}'</code>
+    </pre>
+    <h3 id="%E6%B7%B7%E6%9D%82%E7%9A%84">混杂的</h3>
+    <pre>
+      <code># which command                      # 显示命令的全路径名
+# time command                       # 显示一个命令执行完成所用的时间
+# time cat                           # 使用 time 作为秒表，用 Ctrl-c 来停止
+# set | grep $USER                   # 列显当前环境变量
+# cal -3                             # 显示三个月日历
+# date [-u|--utc|--universal] [MMDDhhmm[[CC]YY][.ss]]
+# date 10022155                      # 设置日期和时间
+# whatis grep                        # 显示命令的简短信息
+# whereis java                       # 查询命令的的路径和标准目录
+# setenv varname value               # 设置环境变量，设置变量 varname 的值为 value (csh/tcsh)
+# export varname="value"             # 设置环境变量，设置变量 varname 的值为 value  (sh/ksh/bash)
+# pwd                                # 显示当前工作目录# mkdir -p /path/to/dir              
+# 如果存在不显示错误，建立所需的上级目录# mkdir -p project/{bin,src,obj,doc/{html,man,pdf},debug/some/more/dirs}
+# rmdir /path/to/dir                 # 移除目录
+# rm -rf /path/to/dir                # 移除目录和其内容(强制)
+# cp -la /dir1 /dir2                 # 存档、硬连接目录所有文件，用来替代拷贝
+# cp -lpR /dir1 /dir2                # 同上 (FreeBSD)
+# cp unixtoolbox.xhtml{,.bak}        # 拷贝文件成新扩展名的快速方法
+# mv /dir1 /dir2                     # 修改目录名</code>
+    </pre>
+  </body>
+</html>

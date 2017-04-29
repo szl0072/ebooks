@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" unique-identifier="BookId" version="2.0">
+	<metadata xmlns:dc="http://purl.org/dc/elements/1.1/"
+		xmlns:opf="http://www.idpf.org/2007/opf"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+		<dc:subject>UNIX TOOLBOX - 中文版</dc:subject>
+		<dc:subject></dc:subject>
+		<dc:title>UNIX TOOLBOX - 中文版</dc:title>
+		<dc:language>en</dc:language>
+		<dc:identifier id="BookId" opf:scheme="URI">http://</dc:identifier>
+		<dc:date opf:event="publication">2015-09-29T07:24:16.000000+00:00</dc:date>
+		<dc:description>这是一份收集Unix/Linux/BSD命令和任务的文档，它有助于高级用户或IT工作。它是一份简明扼要的实用指南，当然读者应该知道他/她在干什么。  
+</dc:description>
+		<dc:publisher>看云</dc:publisher>
+		<dc:relation>http://www.kancloud.cn</dc:relation>
+		<dc:creator opf:file-as="看云文档小组" opf:role="aut">看云文档小组</dc:creator>
+		<dc:source>http://</dc:source>
+		<meta name="calibre:series" content="PHPePub Test books" />
+		<meta name="calibre:series_index" content="1" />
+		<meta name="cover" content="CoverImage" />
+		<meta name="generator" content="EPub (Version 4.0.0) by A. Grandt, http://www.phpclasses.org/package/6115 or https://github.com/Grandt/PHPePub/" />
+	</metadata>
+
+	<manifest>
+		<item id="ncx" href="book.ncx" media-type="application/x-dtbncx+xml" />
+		<item id="css_css1" href="styles.css" media-type="text/css" />
+		<item id="css_CoverPageCss" href="Styles/CoverPage.css" media-type="text/css" />
+		<item id="CoverImage" href="images/Cover.jpg" media-type="image/jpeg" />
+		<item id="ref_cover" href="CoverPage.xhtml" media-type="application/xhtml+xml" />
+		<item id="chapter1" href="html-2339.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter2" href="html-2316.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter3" href="html-2317.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter4" href="html-2318.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter5" href="html-2319.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter6" href="html-2320.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter7" href="html-2321.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter8" href="html-2322.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter9" href="html-2323.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter10" href="html-2324.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter11" href="html-2325.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter12" href="html-2326.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter13" href="html-2327.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter14" href="html-2328.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter15" href="html-2329.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter16" href="html-2330.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter17" href="html-2331.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter18" href="html-2332.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter19" href="html-2333.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter20" href="html-2334.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter21" href="html-2335.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter22" href="html-2336.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter23" href="html-2337.md.html" media-type="application/xhtml+xml" />
+		<item id="chapter24" href="html-2338.md.html" media-type="application/xhtml+xml" />
+	</manifest>
+
+	<spine toc="ncx">
+		<itemref idref="ref_cover" linear="no" />
+		<itemref idref="chapter1" />
+		<itemref idref="chapter2" />
+		<itemref idref="chapter3" />
+		<itemref idref="chapter4" />
+		<itemref idref="chapter5" />
+		<itemref idref="chapter6" />
+		<itemref idref="chapter7" />
+		<itemref idref="chapter8" />
+		<itemref idref="chapter9" />
+		<itemref idref="chapter10" />
+		<itemref idref="chapter11" />
+		<itemref idref="chapter12" />
+		<itemref idref="chapter13" />
+		<itemref idref="chapter14" />
+		<itemref idref="chapter15" />
+		<itemref idref="chapter16" />
+		<itemref idref="chapter17" />
+		<itemref idref="chapter18" />
+		<itemref idref="chapter19" />
+		<itemref idref="chapter20" />
+		<itemref idref="chapter21" />
+		<itemref idref="chapter22" />
+		<itemref idref="chapter23" />
+		<itemref idref="chapter24" />
+	</spine>
+
+	<guide>
+		<reference type="cover" title="CoverPage" href="CoverPage.xhtml" />
+		<reference type="text" title="简介" href="html-2339.md.html" />
+	</guide>
+</package>

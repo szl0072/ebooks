@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <p>Rsync 差不多可以代替 cp 和 scp，此外，断点续传是重启有效的。尾部的斜杠也有着不同的意思，请阅读 man 页面......这里有一些例子：<br/>
+拷贝目录中所有内容：</p>
+    <pre>
+      <code># rsync -a /home/colin/ /backup/colin/
+# rsync -a /var/ /var_bak/
+# rsync -aR --delete-during /home/user/ /backup/      # 使用相对路径(看下面)</code>
+    </pre>
+    <p>同之前一样，但使用了压缩和网络。Rsync 使用 SSH 进行传输，并且使用 SSH 密钥，如果设置的话。和 SCP 一样使用 ":"。一个典型的拷贝：</p>
+    <pre>
+      <code># rsync -axSRzv /home/user/ user@server:/backup/user/</code>
+    </pre>
+    <p>排除在 /home/user/ 中任何 tmp 目录，并且保持相对目录层次结构，远程目录的结构就是 /backup/home/user/。典型的用于备份的命令。</p>
+    <pre>
+      <code># rsync -azR --exclude /tmp/ /home/user/ user@server:/backup/</code>
+    </pre>
+    <p>SSH 连接使用端口 20022：</p>
+    <pre>
+      <code># rsync -az -e 'ssh -p 20022' /home/colin/ user@server:/backup/colin/</code>
+    </pre>
+    <p>使用 rsync 守护进程(使用"::")是很快的，但没有透过 SSH 加密。 位置 /backup 定义在了配置文件 /etc/rsyncd.conf 中。变量 RSYNC_PASSWORD 可以设置用来免除手动输入密码。</p>
+    <pre>
+      <code># rsync -axSRz /home/ ruser@hostname::rmodule/backup/
+# rsync -axSRz ruser@hostname::rmodule/backup/ /home/    # 回拷贝</code>
+    </pre>
+    <p>一些重要选项：</p>
+    <ul>
+      <li>
+        <p><code>-a, --archive</code> 归档模式，等于 -rlptgoD (非 -H)</p>
+      </li>
+      <li>
+        <p><code>-r, --recursive</code> 对子目录以递归模式处理</p>
+      </li>
+      <li>
+        <p><code>-R, --relative</code> 使用相对路径名</p>
+      </li>
+      <li>
+        <p><code>-H, --hard-links</code> 保留硬链结</p>
+      </li>
+      <li>
+        <p><code>-S, --sparse</code> 对稀疏文件进行特殊处理以节省DST的空间</p>
+      </li>
+      <li>
+        <p><code>-x, --one-file-system</code> 不跨越文件系统边界</p>
+      </li>
+      <li>
+        <p><code>--exclude=PATTERN</code> 指定排除不需要传输的文件模式</p>
+      </li>
+      <li>
+        <p><code>--delete-during</code> 传输期间删除</p>
+      </li>
+      <li>
+        <p><code>--delete-after</code> 传输结束以后再删除</p>
+      </li>
+    </ul>
+    <h3 id="%E5%9C%A8+windows+%E4%B8%8A%E4%BD%BF%E7%94%A8+rsync">在 Windows 上使用 Rsync</h3>
+    <p>可以通过 cygwin 或 独立打包的 <a href="http://sourceforge.net/projects/sereds/">cwrsync</a> 来在 Windows 上运行 rsync。这对于自动备份来说非常方便。只装其中一个(<em>不是两个</em>)，然后添加路径到 Windows 系统变量中：# 控制面板 -&gt; 系统 -&gt; 高级标签，环境变量按钮。编辑 "Path" 添加 rsync 的安装路径，比如：C:\Program Files\cwRsync\bin 或者 C:\cygwin\bin。这可以让 <code>rsync</code> 和 <code>ssh</code> 可用于 Windows 命令窗口中。</p>
+    <h3 id="%E5%85%AC%E9%92%A5%E8%AE%A4%E8%AF%81">公钥认证</h3>
+    <p>Rsync 是自动使用 SSH 隧道的，因此在服务端使用 SSH 认证。自动备份可免受用户的影响，rsync 命令对于使用 SSH 公钥认证可以不需要密码。<br/>
+下面所有的命令都可在 windows 控制台中执行。在控制台(开始 -&gt; 运行 -&gt; cmd)中像在 <a href="http://cb.vu/unixtoolbox_zh_CN.xhtml#ssh">SSH</a> 中描述的那样创建和上传密钥，根据你的情况改变 "user" 和 "server"。如果文件 authorized_keys2 不存在，拷贝 id_dsa.pub 成 authorized_keys2 并上传它。</p>
+    <pre>
+      <code># ssh-keygen -t dsa -N ''                   # 创建密钥对
+# rsync user@server:.ssh/authorized_keys2 . # 从服务器拷贝本地文件
+# cat id_dsa.pub &gt;&gt; authorized_keys2        # 或者使用编辑器添加这个公钥
+# rsync authorized_keys2 user@server:.ssh/  # 拷贝文件回服务器
+# del authorized_keys2                      # 删除本地拷贝</code>
+    </pre>
+    <p>现在测试一下(在同一行里面):</p>
+    <pre>
+      <code>rsync -rv "/cygdrive/c/Documents and Settings/%USERNAME%/My Documents/" \
+'user@server:My\ Documents/'</code>
+    </pre>
+    <h3 id="%E8%87%AA%E5%8A%A8%E5%A4%87%E4%BB%BD">自动备份</h3>
+    <p>使用批处理文件自动备份并添加到任务计划(程序 -&gt; 附件 -&gt; 系统工具 -&gt; 任务计划)。举个例子，创建批处理文件 backup.bat 取代 user@server。</p>
+    <pre>
+      <code>@ECHO OFF
+REM rsync the directory My Documents
+SETLOCAL
+SET CWRSYNCHOME=C:\PROGRAM FILES\CWRSYNC
+SET CYGWIN=nontsec
+SET CWOLDPATH=%PATH%
+REM uncomment the next line when using cygwin
+SET PATH=%CWRSYNCHOME%\BIN;%PATH%
+echo Press Control-C to abort
+rsync -av "/cygdrive/c/Documents and Settings/%USERNAME%/My Documents/" \
+'user@server:My\ Documents/'
+pause</code>
+    </pre>
+  </body>
+</html>

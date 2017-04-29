@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <p>Bourne shell (/bin/sh) 存在于所有的 Unix 系统上，并且用她写的脚本是(完全)可移植的； <code>man 1 sh</code> 是一个好的参考。</p>
+    <h2 id="%E5%9F%BA%E7%A1%80">基础</h2>
+    <h3 id="%E5%8F%98%E9%87%8F%E5%92%8C%E5%8F%82%E6%95%B0">变量和参数</h3>
+    <p>使用 <code>variable=value</code> 的命令格式设置变量，其中 variable 是变量名称，value是打算赋给该变量的值。使用 $variable 获取变量值。</p>
+    <pre>
+      <code>MESSAGE="Hello World"                        # 赋予一个字符串
+PI=3.1415                                    # 赋予一个十进制小数N=8
+TWON=`expr $N * 2`                           # 算术表达式(只限整数)
+TWON=$(($N * 2))                             # 另一种语法
+TWOPI=`echo "$PI * 2" | bc -l`               # 使用 bc 进行浮点运算
+ZERO=`echo "c($PI/4)-sqrt(2)/2" | bc -l`</code>
+    </pre>
+    <p>命令行参数：</p>
+    <pre>
+      <code>$0, $1, $2, ...                              # $0 命令本身 
+$#                                           # 命令参数个数
+$*                                           # 所有参数(也可以是 $@)</code>
+    </pre>
+    <h3 id="%E4%B8%80%E4%BA%9B%E7%89%B9%E6%AE%8A%E7%9A%84%E5%8F%98%E9%87%8F">一些特殊的变量</h3>
+    <pre>
+      <code>$$                                           # 当前进程 ID
+$?                                           # 最后命令退出状态码
+  command  if [ $? != 0 ]; then
+    echo "command failed"  fimypath=`pwd`mypath=${mypath}/file.txt
+echo ${mypath##*/}                           # 只显示文件名
+echo ${mypath%%.*}                           # 除了扩展名的全路径
+var2=${var:=string}                          # 如果var没有被赋值，则string值先赋值给var，
+                                             # 然后再赋值给var2</code>
+    </pre>
+    <h3 id="%E7%BB%93%E6%9E%84%E6%8E%A7%E5%88%B6">结构控制</h3>
+    <pre>
+      <code>for file in `ls`
+do
+    echo $file
+done
+count=0
+while [ $count -lt 5 ]; do
+    echo $count
+    sleep 1    
+    count=$(($count + 1))
+done
+
+myfunction() {
+    find . -type f -name "*.$1" -print       # $1 为方法的第一个参数
+}
+myfunction "txt"</code>
+    </pre>
+    <h4 id="%E4%BA%A7%E7%94%9F%E4%B8%80%E4%B8%AA%E6%96%87%E4%BB%B6">产生一个文件</h4>
+    <pre>
+      <code>MYHOME=/home/colin
+cat &gt; testhome.sh &lt;&lt; _EOF# 所有_EOF前的代码都会进入到 testhome.sh 文件中去
+if [ -d "$MYHOME" ] ; then
+    echo $MYHOME exists
+else
+    echo $MYHOME does not exist
+fi
+_EOF
+sh testhome.sh</code>
+    </pre>
+    <h2 id="bourne+%E8%84%9A%E6%9C%AC%E5%AE%9E%E4%BE%8B">Bourne 脚本实例</h2>
+    <p>来一个小实例，此脚本从本 xhtml 文档创建一个 PDF 小册子：</p>
+    <pre>
+      <code>#!/bin/sh# 此脚本可以创建一份供双面打印机打印的 PDF 格式的书
+
+if [ $# -ne 1 ]; then                        # 检查参数是否等于 1
+  echo 1&gt;&amp;2 "Usage: $0 HtmlFile"  
+  exit 1                                     # 如果不等于1，非0退出
+fi
+
+file=$1                                      # 文件变量
+fname=${file%.*}                             # 文件名变量
+fext=${file#*.}                              # 文件扩展名变量
+prince $file -o $fname.pdf                   # www.princexml.com
+pdftops -paper A4 -noshrink $fname.pdf $fname.ps # 创建 postscript 小册子
+cat $fname.ps |psbook|psnup -Pa4 -2 |pstops -b "2:0,1U(21cm,29.7cm)" &gt; $fname.book.ps
+
+ps2pdf13 -sPAPERSIZE=a4 -sAutoRotatePages=None $fname.book.ps $fname.book.pdf                                                                                    # 在 Windows 上使用 #a4 和 #None!
+exit 0                                       # exit 0 意为成功</code>
+    </pre>
+    <h2 id="%E4%B8%80%E4%BA%9B+sed+%E5%91%BD%E4%BB%A4">一些 sed 命令</h2>
+    <p>这里是<a href="http://student.northpark.edu/pemente/sed/sed1line.txt">单行 sed 命令的金矿</a>。还有一个很好的 <a href="http://www.grymoire.com/Unix/Sed.html">sed 介绍及教程</a>。</p>
+    <pre>
+      <code>sed 's/string1/string2/g'                    # 替换 string1 为 string2
+sed -i 's/wroong/wrong/g' *.txt              # 用 g 替换所有返回的单词
+sed 's/\(.*\)1/\12/g'                        # 修改 anystring1 为 anystring2
+sed '/&lt;p&gt;/,/&lt;\/p&gt;/d' t.xhtml                 # 删除以 &lt;p&gt; 开始，以 &lt;/p&gt; 结尾的行
+sed '/ *#/d; /^ *$/d'                        # 删除注释和空行
+sed 's/[ \t]*$//'                            # 删除行尾空格 (使用 tab 代替 \t)
+sed 's/^[ \t]*//;s/[ \t]*$//'                # 删除行头尾空格
+sed 's/[^*]/[&amp;]/'                            # 括住首字符 [] top -&gt; [t]op
+sed = file | sed 'N;s/\n/\t/' &gt; file.num     # 为文件添加行号</code>
+    </pre>
+    <h2 id="%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F">正则表达式</h2>
+    <p>一些基本的正则表达式同样可用于 sed。作为一个良好的启蒙，可看 <a href="http://www.regular-expressions.info/reference.html">基本正则语法</a>。</p>
+    <pre>
+      <code>[\^$.|?*+()                          # 特殊字符，其他字符将匹配自身
+\                                    # 转义特殊字符，当成普通字符对待
+*                                    # 重复前项 0 次或多次
+.                                    # 单个字符除换行符
+.*                                   # 匹配 0 个或多个字符
+^                                    # 匹配字符串行开始处
+$                                    # 匹配字符串行结尾处
+.$                                   # 匹配字符串行最后一个字符
+^ $                                  # 匹配单个空格的行
+[^A-Z]                               # 匹配任何以 A-Z 字符开始的行</code>
+    </pre>
+    <h3 id="%E4%B8%80%E4%BA%9B%E5%AE%9E%E7%94%A8%E5%91%BD%E4%BB%A4">一些实用命令</h3>
+    <p>下列命令对于包含于一个脚本或者单行命令来说很有用。</p>
+    <pre>
+      <code>sort -t. -k1,1n -k2,2n -k3,3n -k4,4n         # 排序 IPv4 格式的 IP 地址
+echo 'Test' | tr '[:lower:]' '[:upper:]'     # 转换成大写
+echo foo.bar | cut -d . -f 1                 # 返回 foo
+PID=$(ps | grep script.sh | grep bin | awk '{print $1}')          # 正在运行名为 script 脚本的 
+PIDPID=$(ps axww | grep [p]ing | awk '{print $1}')                   # ping 的 PID (w/o grep pid)
+IP=$(ifconfig $INTERFACE | sed '/.*inet addr:/!d;s///;s/ .*//')   # Linux
+IP=$(ifconfig $INTERFACE | sed '/.*inet /!d;s///;s/ .*//')        # FreeBSD
+if [ `diff file1 file2 | wc -l` != 0 ]; then [...] fi             # 文件改变了？
+cat /etc/master.passwd | grep -v root | grep -v \*: | awk -F":" \ # 创建 http passwd
+'{ printf("%s:%s\n", $1, $2) }' &gt; /usr/local/etc/apache2/passwd
+
+testuser=$(cat /usr/local/etc/apache2/passwd | grep -v \    # 查看 passwd 中的用户
+root | grep -v \*: | awk -F":" '{ printf("%s\n", $1) }' | grep ^user$)
+:(){ :|:&amp; };:                                # bash fork 炸弹。会干掉你的机器
+tail +2 file &gt; file2                         # 删除文件的第一行</code>
+    </pre>
+    <p>我使用一种小伎俩来一次更改许多文件的扩展名。举个例子，从 .cxx 到 .cpp。排除最后的 <code>| sh</code> 先测试一下。你同样可以使用命令 <code>rename</code> 来做这些，如果安装了的话。或者使用 bash 内建命令。</p>
+    <pre>
+      <code># ls *.cxx | awk -F. '{print "mv "$0" "$1".cpp"}' | sh
+# ls *.c | sed "s/.*/cp &amp; &amp;.$(date "+%Y%m%d")/" | sh # 如 拷贝 *.c 成 *.c.20080401
+# rename .cxx .cpp *.cxx                             # 重命名所有 .cxx 成 .cpp
+# for i in *.cxx; do mv $i ${i%%.cxx}.cpp; done      # bash 内建的</code>
+    </pre>
+  </body>
+</html>

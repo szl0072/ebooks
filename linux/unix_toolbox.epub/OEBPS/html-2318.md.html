@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <h2 id="%E6%9D%83%E9%99%90">权限</h2>
+    <p>用 <code>chmod</code> 和 <code>chown</code> 更改访问权限和所有权。对于所有用户的默认掩码(umask)可以在 /etc/profile (Linux) 或 /etc/login.conf (FreeBSD) 中修改。其默认掩码(umask)通常为 022。掩码可以和777做减法，从而得到755的权限。</p>
+    <pre>
+      <code>1 --x 执行                           
+# Mode 764 = 执行/读/写 | 读/写 | 读2 -w- 写                             
+# |---所有者|---用户组|---其他用户|4 r-- 读
+  ugo=a                              u=所有者, g=用户组, o=其他用户, a=所有用户
+
+# chmod [OPTION] MODE[,MODE] FILE    
+# MODE 可以是 [ugoa]*([-+=]([rwxXst]))
+# chmod 640 /var/log/maillog         
+# 更改 maillog 访问权限为 -rw-r-----
+# chmod u=rw,g=r,o= /var/log/maillog 
+# 同上
+# chmod -R o-r /home/*               
+# 递归去除所有其他用户的可读权限
+# chmod u+s /path/to/prog            
+# 在可执行位设置 SUID (知道你在干什么!)
+# find / -perm -u+s -print           
+# 查找所有设置过 SUID 位的程序
+# chown user:group /path/to/file     
+# 改变文件的所有者和文件关联的组
+# chgrp group /path/to/file          
+# 改变文件关联的组# chmod 640 `find ./ -type f -print` 
+# Change permissions to 640 for all files# chmod 751 `find ./ -type d -print` 
+# Change permissions to 751 for all directories</code>
+    </pre>
+    <h2 id="%E7%A3%81%E7%9B%98%E4%BF%A1%E6%81%AF">磁盘信息</h2>
+    <pre>
+      <code># diskinfo -v /dev/ad2               
+# 显示磁盘信息(扇区/大小) (FreeBSD)
+# hdparm -I /dev/sda                 
+# 显示 IDE/ATA 磁盘信息 (Linux)
+# fdisk /dev/ad2                     
+# 显示和修改磁盘分区表
+# smartctl -a /dev/ad2               
+# 显示磁盘检测信息</code>
+    </pre>
+    <h2 id="boot">Boot</h2>
+    <h2 id="freebsd-5">FreeBSD</h2>
+    <p>如果新内核不能引导，要引导一个旧内核，停止启动倒计时，做如下动作：</p>
+    <pre>
+      <code># unload
+# load kernel.old
+# boot</code>
+    </pre>
+    <h2 id="%E7%B3%BB%E7%BB%9F%E6%8C%82%E8%BD%BD%E7%82%B9%2F%E7%A3%81%E7%9B%98%E4%BD%BF%E7%94%A8%E6%83%85%E5%86%B5">系统挂载点/磁盘使用情况</h2>
+    <pre>
+      <code># mount | column -t                  
+# 显示系统已挂载分区情况
+# df                                 
+# 显示磁盘剩余空间和挂载的设备
+# cat /proc/partitions               
+# 显示所有设备的所有分区(Linux)</code>
+    </pre>
+    <h2 id="%E7%A3%81%E7%9B%98%E4%BD%BF%E7%94%A8%E6%83%85%E5%86%B5">磁盘使用情况</h2>
+    <pre>
+      <code># du -sh *                           
+# 列出当前目录下所有文件夹大小
+# du -csh                            
+# 当前目录下所有目录大小总数
+# du -ks * | sort -n -r              
+# 由大到小排序显示目录大小
+# ls -lSr                            
+# 由小到大显示文件列表</code>
+    </pre>
+    <h2 id="%E8%B0%81%E6%89%93%E5%BC%80%E4%BA%86%E9%82%A3%E4%BA%9B%E6%96%87%E4%BB%B6">谁打开了那些文件</h2>
+    <p>对于找出哪些文件阻止卸载分区并给出有代表性的错误是有帮助的：</p>
+    <pre>
+      <code># umount /home/
+umount: unmount of /home             
+# 不能卸载，因为有一个文件锁定了 home
+   failed: Device busy</code>
+    </pre>
+    <h2 id="freebsd+%E5%92%8C%E5%A4%A7%E5%A4%9A%E6%95%B0+unix">FreeBSD 和大多数 Unix</h2>
+    <pre>
+      <code># fstat -f /home                     
+# 对于一个挂载点# fstat -p PID                       
+# 对于一个应用程序进程 ID# fstat -u user                      
+# 对于一个用户</code>
+    </pre>
+    <p>查找已打开日志文件(或其他已打开文件)， 比如 Xorg：</p>
+    <pre>
+      <code># ps ax | grep Xorg | awk '{print $1}'
+1252
+# fstat -p 1252
+USER     CMD          PID   FD MOUNT      INUM MODE         SZ|DV R/W
+root     Xorg        1252 root /             2 drwxr-xr-x     512  r
+root     Xorg        1252 text /usr     216016 -rws--x--x  1679848 r
+root     Xorg        1252    0 /var     212042 -rw-r--r--   56987  w</code>
+    </pre>
+    <p>在 /var 中的只有一个 inum 为 212042 的文件：</p>
+    <pre>
+      <code># find -x /var -inum 212042
+/var/log/Xorg.0.log</code>
+    </pre>
+    <h3 id="linux-5">Linux</h3>
+    <p>使用 <code>fuser</code> 或 <code>lsof</code> 在一个挂载点中查找已打开的文件：</p>
+    <pre>
+      <code># fuser -m /home                     
+# 列出访问 /home 的进程
+# lsof /home
+COMMAND   PID    USER   FD   TYPE DEVICE    SIZE     NODE NAME
+tcsh    29029 eedcoba  cwd    DIR   0,18   12288  1048587 /home/eedcoba (guam:/home)
+lsof    29140 eedcoba  cwd    DIR   0,18   12288  1048587 /home/eedcoba (guam:/home)</code>
+    </pre>
+    <p>关于一个应用程序：</p>
+    <pre>
+      <code>ps ax | grep Xorg | awk '{print $1}'
+3324
+# lsof -p 3324
+COMMAND   PID    USER   FD   TYPE DEVICE    SIZE    NODE NAME
+Xorg    3324 root    0w   REG        8,6   56296      12492 /var/log/Xorg.0.log</code>
+    </pre>
+    <p>关于单个文件：</p>
+    <pre>
+      <code># lsof /var/log/Xorg.0.log
+COMMAND  PID USER   FD   TYPE DEVICE  SIZE  NODE NAME
+Xorg    3324 root    0w   REG    8,6 56296 12492 /var/log/Xorg.0.log</code>
+    </pre>
+    <h2 id="%E6%8C%82%E8%BD%BD%2F%E9%87%8D%E6%8C%82%E8%BD%BD%E4%B8%80%E4%B8%AA%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F">挂载/重挂载一个文件系统</h2>
+    <p>举个 cdrom 的例子。如果已经列于 /etc/fstab 中：</p>
+    <pre>
+      <code># mount /cdrom</code>
+    </pre>
+    <p>或在 /dev/ 中查找设备，亦或使用 <code>dmesg</code> 命令</p>
+    <h2 id="freebsd-6">FreeBSD</h2>
+    <pre>
+      <code># mount -v -t cd9660 /dev/cd0c /mnt  
+# cdrom# mount_cd9660 /dev/wcd0c /cdrom     
+# 另外一个方法# mount -v -t msdos /dev/fd0c /mnt   
+# 软驱</code>
+    </pre>
+    <p>/etc/fstab 中的一条：</p>
+    <pre>
+      <code># Device                Mountpoint      FStype  Options         Dump    Pass#
+/dev/acd0               /cdrom          cd9660  ro,noauto       0       0</code>
+    </pre>
+    <p>要允许用户做这些，可以这么做：</p>
+    <pre>
+      <code># sysctl vfs.usermount=1  # 或者在 /etc/sysctl.conf 中插入一条 "vfs.usermount=1"</code>
+    </pre>
+    <h2 id="linux-6">Linux</h2>
+    <pre>
+      <code># mount -t auto /dev/cdrom /mnt/cdrom   
+# 典型的 cdrom 挂载命令
+# mount /dev/hdc -t iso9660 -r /cdrom  
+# IDE
+# mount /dev/sdc0 -t iso9660 -r /cdrom  # SCSI</code>
+    </pre>
+    <p>/etc/fstab 中的条目：</p>
+    <pre>
+      <code>/dev/cdrom   /media/cdrom  subfs noauto,fs=cdfss,ro,procuid,nosuid,nodev,exec 0 0</code>
+    </pre>
+    <h3 id="%E7%94%A8+linux+%E6%8C%82%E8%BD%BD%E4%B8%80%E4%B8%AA+freebsd+%E5%88%86%E5%8C%BA">用 Linux 挂载一个 FreeBSD 分区</h3>
+    <p>用 fdisk 查找分区号，这通常是 root 分区，但也可能是其他 BSD slice。如果 FreeBSD 有许多 slice，他们不列于同一个 fdisk 分区表中，但可见于 /dev/sda<em> 或 /dev/hda</em> 中。</p>
+    <pre>
+      <code># fdisk /dev/sda                     
+# 查找 FreeBSD 分区/dev/sda3   *        5357        7905    20474842+  a5  FreeBSD
+# mount -t ufs -o ufstype=ufs2,ro /dev/sda3 /mnt
+/dev/sda10 = /tmp; /dev/sda11 /usr   
+# 其他 slice</code>
+    </pre>
+    <h2 id="%E9%87%8D%E6%8C%82%E8%BD%BD">重挂载</h2>
+    <p>不用卸载一个设备来重挂载。 对 <code>fsck</code> 来说是必须的。举个例子：</p>
+    <pre>
+      <code># mount -o remount,ro /              
+# Linux# mount -o ro /                      
+# FreeBSD</code>
+    </pre>
+    <p>从 cdrom 拷贝原始数据进一个 iso 映像文件：</p>
+    <pre>
+      <code># dd if=/dev/cd0c of=file.iso</code>
+    </pre>
+    <h2 id="%E7%BB%99%E5%8D%B3%E6%97%B6%E7%83%A7%E5%BD%95%28on-the-fly%29%E6%B7%BB%E5%8A%A0+swap">给即时烧录(on-the-fly)添加 swap</h2>
+    <p>假设你需要很多的 swap (即刻)，如一个 2GB 文件 /swap2gb (只限 Linux)。</p>
+    <pre>
+      <code># dd if=/dev/zero of=/swap2gb bs=1024k count=2000
+# mkswap /swap2gb                    
+# 创建交换区
+# swapon /swap2gb                    
+# 激活这个 swap。现在可以使用了
+# swapoff /swap2gb                   
+# 当使用完毕，释放这个 swap
+# rm /swap2gb</code>
+    </pre>
+    <h2 id="%E6%8C%82%E8%BD%BD%E4%B8%80%E4%B8%AA+smb%C2%A0%E5%85%B1%E4%BA%AB">挂载一个 SMB 共享</h2>
+    <p>假设我们要访问计算机 smbserver 上的名叫 myshare 的 SMB 共享，在 window PC 上键入的地址是 \smbserver\myshare\。我挂载到 /mnt/smbshare 上。注意 cifs 必须是 IP 或 DNS 名，不是 Windows 名字。</p>
+    <h2 id="linux-7">Linux</h2>
+    <pre>
+      <code># smbclient -U user -I 192.168.16.229 -L //smbshare/    
+# 列出共享
+# mount -t smbfs -o username=winuser //smbserver/myshare /mnt/smbshare
+# mount -t cifs -o username=winuser,password=winpwd //192.168.16.229/myshare /mnt/share</code>
+    </pre>
+    <p>此外，mount.cifs 软件包可以存储认证到一个文件中。例如，<code>/home/user/.smb</code>:</p>
+    <pre>
+      <code>username=winuser
+password=winpwd</code>
+    </pre>
+    <p>现在可以像下面那样挂载：</p>
+    <pre>
+      <code># mount -t cifs -o credentials=/home/user/.smb //192.168.16.229/myshare /mnt/smbshare</code>
+    </pre>
+    <h2 id="freebsd-7">FreeBSD</h2>
+    <p>使用 -I 来获取 IP (或 DNS 名）；smbserver 是 Windows 名。</p>
+    <pre>
+      <code># smbutil view -I 192.168.16.229 //winuser@smbserver    
+# 列出共享
+# mount_smbfs -I 192.168.16.229 //winuser@smbserver/myshare /mnt/smbshare</code>
+    </pre>
+    <h2 id="%E6%8C%82%E8%BD%BD%E9%95%9C%E5%83%8F%E6%96%87%E4%BB%B6">挂载镜像文件</h2>
+    <h3 id="linux+loop-back">Linux loop-back</h3>
+    <pre>
+      <code># mount -t iso9660 -o loop file.iso /mnt                
+# 挂载 CD 镜像文件
+# mount -t ext3 -o loop file.img /mnt                   
+# 用 ext3 文件系统挂载镜像文件</code>
+    </pre>
+    <h2 id="freebsd-8">FreeBSD</h2>
+    <p>用于存储设备 (如果需要做 # kldload md.ko 动作)：</p>
+    <pre>
+      <code># mdconfig -a -t vnode -f file.iso -u 0
+# mount -t cd9660 /dev/md0 /mnt
+# umount /mnt; mdconfig -d -u 0                         
+# 清除 md 设备</code>
+    </pre>
+    <p>用于虚拟节点：</p>
+    <pre>
+      <code># vnconfig /dev/vn0c file.iso; mount -t cd9660 /dev/vn0c /mnt
+# umount /mnt; vnconfig -u /dev/vn0c                    
+# 清除 vn 设备</code>
+    </pre>
+    <h2 id="solaris+and+freebsd">Solaris and FreeBSD</h2>
+    <p>用于 loop-back 文件接口或 lofi：</p>
+    <pre>
+      <code># lofiadm -a file.iso
+# mount -F hsfs -o ro /dev/lofi/1 /mnt
+# umount /mnt; lofiadm -d /dev/lofi/1                   
+# 清除 lofi 设备</code>
+    </pre>
+    <h2 id="%E5%88%9B%E5%BB%BA%E5%B9%B6%E5%88%BB%E5%BD%95+iso+%E9%95%9C%E5%83%8F%E6%96%87%E4%BB%B6">创建并刻录 ISO 镜像文件</h2>
+    <p>这将会拷贝 CD 或者 DVD 的扇区。当不用 <code>conv=notrunc</code>，镜像文件会等于 CD 内容大小而非 CD 容量大小。看下面和 <a href="http://cb.vu/unixtoolbox_zh_CN.xhtml#dd">dd 例子</a>。</p>
+    <pre>
+      <code># dd if=/dev/hdc of=/tmp/mycd.iso bs=2048 conv=notrunc</code>
+    </pre>
+    <p>使用 mkisofs 把目录中所有文件创建成 CD/DVD 镜像文件。克服文件名限制：-r 开启 Rock Ridge 扩展用于 Unix 系统，-J 开启 Joliet 扩展用于微软系统。-L 允许 ISO9660 文件名第一个字符为句点。</p>
+    <pre>
+      <code># mkisofs -J -L -r -V TITLE -o imagefile.iso /path/to/dir</code>
+    </pre>
+    <p>对于 FreeBSD，mkisofs 可以到 port 的 sysutils/cdrtools 中找到。</p>
+    <h2 id="%E5%88%BB%E5%BD%95+iso+%E9%95%9C%E5%83%8F%E6%96%87%E4%BB%B6">刻录 ISO 镜像文件</h2>
+    <h3 id="freebsd-9">FreeBSD</h3>
+    <p>FreeBSD 默认情况下没有在 ATAPI 驱动上启用 DMA。DMA 可用 sysctl 命令启用，其参数如下，或者在 /boot/loader.conf 中添加如下条目：</p>
+    <pre>
+      <code>hw.ata.ata_dma="1"
+hw.ata.atapi_dma="1"</code>
+    </pre>
+    <p><code>burncd</code> 用于 ATAPI 驱动(<code>burncd</code> 为基本系统的一部分)，<code>cdrecord</code> (在 sysutils/cdrtools 中)用于 SCSI 驱动。</p>
+    <pre>
+      <code># burncd -f /dev/acd0 data imagefile.iso fixate      
+# ATAPI 驱动
+# cdrecord -scanbus                  
+# 查找 burner 设备描述符(如 1,0,0)
+# cdrecord dev=1,0,0 imagefile.iso</code>
+    </pre>
+    <h3 id="linux-8">Linux</h3>
+    <p>对于 Linux，同样使用 <code>cdrecord</code> 如上文所述。此外，它还可以使用本地 ATAPI 接口查找设备描述符：</p>
+    <pre>
+      <code># cdrecord dev=ATAPI -scanbus</code>
+    </pre>
+    <p>然后同上面一样烧录 CD/DVD。</p>
+    <h3 id="dvd%2Brw-tools">dvd+rw-tools</h3>
+    <p><a href="http://fy.chalmers.se/~appro/linux/DVD+RW/">dvd+rw-tools</a> 工具包(FreeBSD: ports/sysutils/dvd+rw-tools)可以做上面的一切，其还包括 growisofs 工具来刻录 CD 或 DVD。本实例所引用的 DVD 设备 <code>/dev/dvd</code> 可能是指向<code>/dev/scd0</code> (Linux)的符号连接，或者 <code>/dev/cd0</code> (FreeBSD)，或者 <code>/dev/rcd0c</code> (NetBSD/OpenBSD)，或者 <code>/dev/rdsk/c0t1d0s2</code> (Solaris)。对于本实例 <a href="http://www.freebsd.org/handbook/creating-dvds.html">FreeBSD 手册 18.7 章</a> 上有一份很好的文档。</p>
+    <pre>
+      <code># -dvd-compat 选项将完结光盘，光盘便不可再附加数据
+# growisofs -dvd-compat -Z /dev/dvd=imagefile.iso     
+# 刻录已存在的 iso 镜像文件
+# growisofs -dvd-compat -Z /dev/dvd -J -R /p/to/data  
+# 直接刻录</code>
+    </pre>
+    <h2 id="%E8%BD%AC%E6%8D%A2+nero+.nrg+%E6%96%87%E4%BB%B6%E6%88%90+.iso">转换 Nero .nrg 文件成 .iso</h2>
+    <p>Nero 简单的添加了 300KB 的头到一个常规的 iso 镜像文件中。我们可用 dd 工具来去除它。</p>
+    <pre>
+      <code># dd bs=1k if=imagefile.nrg of=imagefile.iso skip=300</code>
+    </pre>
+    <h2 id="%E8%BD%AC%E6%8D%A2+bin%2Fcue+%E9%95%9C%E5%83%8F%E6%88%90+.iso">转换 bin/cue 镜像成 .iso</h2>
+    <p><a href="http://freshmeat.net/projects/bchunk/"><code>bchunk</code> 程序</a>可以做到这一点。在 FreeBSD 中，它在 port 的 sysutils/bchunk 中。</p>
+    <pre>
+      <code># bchunk imagefile.bin imagefile.cue imagefile.iso</code>
+    </pre>
+    <h2 id="%E5%88%9B%E5%BB%BA%E5%9F%BA%E4%BA%8E%E6%96%87%E4%BB%B6%E7%9A%84%E9%95%9C%E5%83%8F%E6%96%87%E4%BB%B6">创建基于文件的镜像文件</h2>
+    <p>举个例子，一个使用文件 /usr/vdisk.img 的 1GB 分区。这里我们使用 vnode 0,但也可为 1。</p>
+    <h2 id="freebsd-10">FreeBSD</h2>
+    <pre>
+      <code># dd if=/dev/random of=/usr/vdisk.img bs=1K count=1M
+# mdconfig -a -t vnode -f /usr/vdisk.img -u 0         
+# 创建设备 /dev/md1# bsdlabel -w /dev/md0
+# newfs /dev/md0c
+# mount /dev/md0c /mnt
+# umount /mnt; mdconfig -d -u 0; rm /usr/vdisk.img    
+# 清除 md 设备</code>
+    </pre>
+    <p>这个基于文件的镜像文件可以在 /etc/rc.conf 和 /etc/fstab 中配置成启动期间自动挂载。可用 <code># /etc/rc.d/mdconfig start</code> (先用 <code># mdconfig -d -u 0</code> 命令删除 md0 设备) 测试你的设置。<br/>
+需要注意的是，那个自动设置仅工作于这个基于文件的镜像文件不在 root 分区中。原因是 /etc/rc.d/mdconfig 脚本早于启动就执行了，并且 root 分区仍然是只读的。脚本 /etc/rc.d/mdconfig2 之后，镜像文件将位于 root 分区外挂载。<br/>
+/boot/loader.conf:</p>
+    <pre>
+      <code>md_load="YES"</code>
+    </pre>
+    <p>/etc/rc.conf:</p>
+    <pre>
+      <code># mdconfig_md0="-t vnode -f /usr/vdisk.img"          
+# /usr 不在 root 分区中</code>
+    </pre>
+    <p>/etc/fstab: (行后的两个 0 0 很重要，它告诉 fsck 忽略这个设备,现在还不存在。)</p>
+    <pre>
+      <code>/dev/md0                /usr/vdisk      ufs     rw              0       0</code>
+    </pre>
+    <p>也可能在增加镜像文件的大小之后，如增大到 300MB。</p>
+    <pre>
+      <code># umount /mnt; mdconfig -d -u 0
+# dd if=/dev/zero bs=1m count=300 &gt;&gt; /usr/vdisk.img
+# mdconfig -a -t vnode -f /usr/vdisk.img -u 0
+# growfs /dev/md0
+# mount /dev/md0c /mnt                                
+# 文件分区现在为 300MB</code>
+    </pre>
+    <h3 id="linux-9">Linux</h3>
+    <pre>
+      <code># dd if=/dev/zero of=/usr/vdisk.img bs=1024k count=1024
+# mkfs.ext3 /usr/vdisk.img
+# mount -o loop /usr/vdisk.img /mnt
+# umount /mnt; rm /usr/vdisk.img                      
+# 清楚</code>
+    </pre>
+    <h2 id="linux+with+losetup">Linux with losetup</h2>
+    <p><code>/dev/zero</code> 比 <code>urandom</code> 更快，但对于加密来说却不够安全。</p>
+    <pre>
+      <code># dd if=/dev/urandom of=/usr/vdisk.img bs=1024k count=1024
+# losetup /dev/loop0 /usr/vdisk.img                   
+# 创建并联结 /dev/loop0# mkfs.ext3 /dev/loop0
+# mount /dev/loop0 /mnt
+# losetup -a                                          
+# 查看已经挂载的 loop 设备# umount /mnt
+# losetup -d /dev/loop0                               
+# Detach# rm /usr/vdisk.img</code>
+    </pre>
+    <h2 id="%E5%88%9B%E5%BB%BA%E5%9F%BA%E4%BA%8E%E5%86%85%E5%AD%98%E7%9A%84%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F">创建基于内存的文件系统</h2>
+    <p>基于内存的文件系统对于重量级 IO 应用程序来说非常快。怎样创建一个挂载到 /memdisk 的 64M 分区：</p>
+    <h3 id="freebsd-11">FreeBSD</h3>
+    <pre>
+      <code># mount_mfs -o rw -s 64M md /memdisk
+# umount /memdisk; mdconfig -d -u 0                   
+# 清除该 md 设备md     /memdisk     mfs     rw,-s64M    0   0         
+# /etc/fstab 条目</code>
+    </pre>
+    <h3 id="linux-10">Linux</h3>
+    <pre>
+      <code># mount -t tmpfs -osize=64m tmpfs /memdisk</code>
+    </pre>
+    <h2 id="%E7%A3%81%E7%9B%98%E6%80%A7%E8%83%BD">磁盘性能</h2>
+    <p>在 ad4s3c (/home) 分区上读写一个 1GB 的文件。</p>
+    <pre>
+      <code># time dd if=/dev/ad4s3c of=/dev/null bs=1024k count=1000
+# time dd if=/dev/zero bs=1024k count=1000 of=/home/1Gb.file
+# hdparm -tT /dev/hda      
+# 仅限 Linux</code>
+    </pre>
+  </body>
+</html>

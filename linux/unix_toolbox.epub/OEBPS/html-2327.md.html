@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <h2 id="%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%AE%BE%E7%BD%AE">服务器设置</h2>
+    <h3 id="cvs+%E7%8E%AF%E5%A2%83%E5%88%9D%E5%A7%8B%E5%8C%96">CVS 环境初始化</h3>
+    <p>决定主 repository 将要创建和重置的 cvs 根目录。比如 /usr/local/cvs (根)：</p>
+    <pre>
+      <code># mkdir -p /usr/local/cvs
+# setenv CVSROOT /usr/local/cvs      # 设置 CVSROOT 环境变量(本地)
+# cvs init                           # 创建所有初始化 CVS 配置文件
+# cd /root
+# cvs checkout CVSROOT               # 签出配置文件来修改他们
+# cd CVSROOT
+edit config ( fine as it is)
+# cvs commit config
+cat &gt;&gt; writers                       # 创建 writers 文件 (也可为 readers)colin
+^D                                   # 使用 [Control][D] 退出编辑
+# cvs add writers                    # 添加文件 writers 进 repository
+# cvs edit checkoutlist
+# cat &gt;&gt; checkoutlist
+writers
+^D                                   # 使用 [Control][D] 退出编辑
+# cvs commit                         # 提交所有配置更改</code>
+    </pre>
+    <p>添加一个 <strong>readers</strong> 文件，如果你要区分读写权限的话。<em>注意：</em> 不要在主 cvs 中直接编辑文件，而应该签出要编辑的文件，修改完成后再签入。我们所做的文件 <strong>writers</strong> 用来定义可写权限。<br/>
+下面有三种流行的方式去访问 CVS。前两个不需要任何进一步的配置。看 <a href="http://cb.vu/unixtoolbox_zh_CN.xhtml#cvsroot">CVSROOT</a> 部分的实例了解如何使用它们：</p>
+    <ul>
+      <li>
+        <p>直接本的访问文件系统。用户需要有足够的权限来直接访问 CVS，除了要登录到操作系统，没有进一步的验证。然而这仅对本地 repository 才有用。</p>
+      </li>
+      <li>
+        <p>使用 ext 协议通过 ssh 来远程访问。任何有 ssh shell 账户和在 CVS 服务器上可读写权限的都可直接使用 ext 协议通过 ssh 来访问 CVS，而不需要任何额外的隧道。没有服务器来处理运行在 CVS 上的验证工作。ssh 登录会去验证。</p>
+      </li>
+      <li>
+        <p>用 pserver 来远程访问。这是对于有较大用户量的首选方法，用户由 CVS 的 pserver 通过一个专门的密码数据库来验证，因此不需要本地用户帐户。这种设置在下面会有说明。</p>
+      </li>
+    </ul>
+    <h3 id="%E7%94%A8+inetd+%E8%AE%BE%E7%BD%AE%E7%BD%91%E7%BB%9C">用 inetd 设置网络</h3>
+    <p>如果不需要网络访问，CVS 可以运行于本地。对于远程访问，在 /etc/inetd.conf (Suse 为 /etc/xinetd.d/cvs)中配置如下行，可让守护进程 inetd 启动 pserver：</p>
+    <pre>
+      <code>cvspserver  stream  tcp  nowait  cvs  /usr/bin/cvs  cvs \
+--allow-root=/usr/local/cvs pserver</code>
+    </pre>
+    <p>这是个用来阻断从 internet 访问 cvs 端口的好方法，可使用 ssh 隧道来远程的访问 repository。</p>
+    <h2 id="%E5%8D%95%E7%8B%AC%E8%AE%A4%E8%AF%81">单独认证</h2>
+    <p>CVS 用户可能不是操作系统的一部分(即不是本地用户)。这其实可从安全的角度去看。简单的添加一个叫 <strong>passwd</strong> (in the CVSROOT directory) 的文件，其包含 crypt 格式的用户登录名和密码。这也可以使用 apache 的 htpasswd 工具来完成。<br/>
+_注意：_这个 passwd 文件仅仅是文件，可以在 CVSROOT 中直接编辑。它不能被签出。更多信息请用 htpasswd --help</p>
+    <pre>
+      <code># htpasswd -cb passwd user1 password1  # -c 创建文件
+# htpasswd -b passwd user2 password2</code>
+    </pre>
+    <p>现在添加 <code>:cvs</code> 到每行的结尾处，用来告诉 cvs 服务器更改用户到 cvs (或任何你正在运行的 cvs 服务器下)。它看起来像这样：</p>
+    <pre>
+      <code># cat passwd
+user1:xsFjhU22u8Fuo:cvs
+user2:vnefJOsnnvToM:cvs</code>
+    </pre>
+    <h3 id="%E6%B5%8B%E8%AF%95%E5%AE%83">测试它</h3>
+    <p>测试作为一般用户登录(比如我)</p>
+    <pre>
+      <code># cvs -d :pserver:colin@192.168.50.254:/usr/local/cvs login
+Logging in to :pserver:colin@192.168.50.254:2401/usr/local/cvs
+CVS password:</code>
+    </pre>
+    <h3 id="cvsroot+%E5%8F%98%E9%87%8F">CVSROOT 变量</h3>
+    <p>这是个环境变量用来指定 repository 的位置。对于本地使用，该变量只需设置成 repository 的目录。对于通过网络使用，传输协议必须指定。使用 <code>setenv CVSROOT string</code> (csh, tcsh shell) 或者 <code>export CVSROOT=string</code> ( sh, bash shell) 设置 CVSROOT 环境变量。</p>
+    <pre>
+      <code># setenv CVSROOT :pserver:&lt;username&gt;@&lt;host&gt;:/cvsdirectory
+For example:
+# setenv CVSROOT /usr/local/cvs                               # 仅限本的使用
+# setenv CVSROOT :local:/usr/local/cvs                        # 同上
+# setenv CVSROOT :ext:user@cvsserver:/usr/local/cvs           # 通过 SSH 直接访问
+# setenv CVS_RSH ssh                                          # ext 协议访问
+# setenv CVSROOT :pserver:user@cvsserver.254:/usr/local/cvs   # 通过 pserver 网络访问</code>
+    </pre>
+    <p>一旦登录成功就可导入一个新项目进 repository：<strong>cd 进入</strong>你的项目根目录</p>
+    <pre>
+      <code>cvs import &lt;module name&gt; &lt;vendor tag&gt; &lt;initial tag&gt;
+cvs -d :pserver:colin@192.168.50.254:/usr/local/cvs import MyProject MyCompany START</code>
+    </pre>
+    <p>在 repository 中有个名叫 MyProject 新项目(之后用来签出)。CVS 会导入当前目录的内容进新项目。  </p>
+    <p>签出：</p>
+    <pre>
+      <code># cvs -d :pserver:colin@192.168.50.254:/usr/local/cvs checkout MyProject
+或者
+# setenv CVSROOT :pserver:colin@192.168.50.254:/usr/local/cvs
+# cvs checkout MyProject</code>
+    </pre>
+    <h3 id="%E9%80%9A%E8%BF%87+ssh+%E9%9A%A7%E9%81%93%E8%AE%BF%E9%97%AE+cvs">通过 SSH 隧道访问 CVS</h3>
+    <p>我们需要两个 shell 来做这个。在第一个 shell 中，我们连接到 cvs 服务器并对 cvs 连接进行端口转发(port-forward)。在第二个 shell 中，我们就像在本地一样使用 cvs。 <br/>
+在 shell 1:</p>
+    <pre>
+      <code># ssh -L2401:localhost:2401 colin@cvs_server   # 直接连接到 cvs 服务器。或：
+# ssh -L2401:cvs_server:2401 colin@gateway     # 使用一个网关间接连接到 cvs 服务器</code>
+    </pre>
+    <p>在 shell 2:</p>
+    <pre>
+      <code># setenv CVSROOT :pserver:colin@localhost:/usr/local/cvs
+# cvs login
+Logging in to :pserver:colin@localhost:2401/usr/local/cvs
+CVS password:
+# cvs checkout MyProject/src</code>
+    </pre>
+    <h2 id="cvs+%E5%91%BD%E4%BB%A4%E5%8F%8A%E5%85%B6%E4%BD%BF%E7%94%A8">CVS 命令及其使用</h2>
+    <h3 id="%E5%AF%BC%E5%85%A5">导入</h3>
+    <p>该 import 命令用来添加整个目录，它必须运行于要导入的目录中。比如，目录 /devel/ 包含的所有文件和子目录要导入。该目录名在 CVS 中(模块)将会称为 "myapp"。</p>
+    <pre>
+      <code># cvs import [options] directory-name vendor-tag release-tag
+# cd /devel                          # 必须在该目录中来导入
+# cvs import myapp Company R1_0      # 修订(release)标签可以为任何单个单词</code>
+    </pre>
+    <p>在添加了一个新目录 "/devel/tools/" 后，也可这么导入。</p>
+    <pre>
+      <code># cd /devel/tools
+# cvs import myapp/tools Company R1_0</code>
+    </pre>
+    <h3 id="%E7%AD%BE%E5%87%BA%E3%80%81%E6%9B%B4%E6%96%B0%E5%92%8C%E6%8F%90%E4%BA%A4">签出、更新和提交</h3>
+    <pre>
+      <code># cvs co myapp/tools                 # 仅会签出 tools 目录
+# cvs co -r R1_1 myapp               # 签出修订版本为 R1_1 的 myapp (sticky)
+# cvs -q -d update -P                # 典型的 CVS 更新
+# cvs update -A                      # 重置所有 sticky 标签(或日期、选项)
+# cvs add newfile                    # 添加一个新文件
+# cvs add -kb newfile                # 添加一个二进制文件
+# cvs commit file1 file2             # 仅提交这两个文件
+# cvs commit -m "message"            # 提交所有更改并为这个更改添加日志消息</code>
+    </pre>
+    <h3 id="%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA+patch">创建一个 patch</h3>
+    <p>It is best to create and apply a patch from the working development directory related to the project, or from within the source directory.</p>
+    <pre>
+      <code># cd /devel/project
+# diff -Naur olddir newdir &gt; patchfile # Create a patch from a directory or a file
+# diff -Naur oldfile newfile &gt; patchfile</code>
+    </pre>
+    <h3 id="%E5%BA%94%E7%94%A8%E4%B8%80%E4%B8%AA+patch">应用一个 patch</h3>
+    <p>Sometimes it is necessary to strip a directory level from the patch, depending how it was created. In case of difficulties, simply look at the first lines of the patch and try -p0, -p1 or -p2.</p>
+    <pre>
+      <code># cd /devel/project
+# patch --dry-run -p0 &lt; patchfile    # Test the path without applying it
+# patch -p0 &lt; patchfile
+# patch -p1 &lt; patchfile              # strip off the 1st level from the path</code>
+    </pre>
+  </body>
+</html>

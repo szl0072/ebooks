@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <p>许多 Linux 发行版使用 BASH Shell，BSD 使用的是 tcsh，Bourne Shell 仅用于脚本。过滤器(Filter)非常有用并且可用于管道(pipe)：</p>
+    <ul>
+      <li>
+        <p><code>grep</code>    模式匹配</p>
+      </li>
+      <li>
+        <p><code>sed</code>     查找并替换字符串或字符</p>
+      </li>
+      <li>
+        <p><code>cut</code>     从一个标记开始打印所指定列数据</p>
+      </li>
+      <li>
+        <p><code>sort</code>    按字母或数字排序</p>
+      </li>
+      <li>
+        <p><code>uniq</code>    删除一个文件中重复行</p>
+      </li>
+    </ul>
+    <p>举个例子，一次使用所有命令：</p>
+    <pre>
+      <code># ifconfig | sed 's/  / /g' | cut -d" " -f1 | uniq | grep -E "[a-z0-9]+" | sort -r
+# ifconfig | sed '/.*inet addr:/!d;s///;s/ .*//'|sort -t. -k1,1n -k2,2n -k3,3n -k4,4n</code>
+    </pre>
+    <p>sed 的模式字符串中的第一个字符是一个 tab。要在命令控制台中输入 tab，可以使用 ctrl-v ctrl-tab。</p>
+    <h2 id="bash">bash</h2>
+    <p>Bash、sh 的重定向和管道：</p>
+    <pre>
+      <code># cmd 1&gt; file                         # 重定向标准输出到 file。
+# cmd 2&gt; file                         # 重定向标准错误输出到 file。
+# cmd 1&gt;&gt; file                        # 重定向标准输出并追加到 file。
+# cmd &amp;&gt; file                         # 重定向标准输出和标准错误输出到 file。
+# cmd &gt;file 2&gt;&amp;1                      # 重定向标准错误输出到标准输出然后重定向到 file。
+# cmd1 | cmd2                         # cmd1 的输出通过管道连接到 cmd2 的输入
+# cmd1 2&gt;&amp;1 | cmd2                    # cmd1 的输出和错误输出通过管道连接到 cmd2 的输入</code>
+    </pre>
+    <p>修改你的配置文件 ~/.bashrc (也可以是 ~/.bash_profile)。下列条目非常有用，使用". .bashrc"重新加载。</p>
+    <pre>
+      <code># in .bashrc
+bind '"\e[A"':history-search-backward # 使用上下键查找
+bind '"\e[B"':history-search-forward  # 历史命令。无价之宝!
+set -o emacs                          # Set emacs mode in bash (看下面)
+set bell-style visible                # Do not beep, inverse colors
+    # 设置一个漂亮的提示符像 [user@host]/path/todir&gt;
+PS1="\[\033[1;30m\][\[\033[1;34m\]\u\[\033[1;30m\]"
+PS1="$PS1@\[\033[0;33m\]\h\[\033[1;30m\]]\[\033[0;37m\]"
+PS1="$PS1\w\[\033[1;30m\]&gt;\[\033[0m\]"
+
+# 要检查当前可用别名(alias)，只需简单输入命令 aliasalias  ls='ls -aF'                    
+# 添加指示符(*/=&gt;@| 其中之一)alias  ll='ls -aFls'                  
+# 清单alias  la='ls -all'
+alias ..='cd ..'
+alias ...='cd ../..'
+export HISTFILESIZE=5000              # 巨大的历史记录
+export CLICOLOR=1                     # 使用颜色(如果可用)
+export LSCOLORS=ExGxFxdxCxDxDxBxBxExEx</code>
+    </pre>
+    <h2 id="tcsh">tcsh</h2>
+    <p>Tcsh、csh 的重定向和管道(&gt; 和 &gt;&gt; 同 sh 中一样)：</p>
+    <pre>
+      <code># cmd &gt;&amp; file                         # 重定向标准输出和标准错误输出到 file。
+# cmd &gt;&gt;&amp; file                        # 追加标准输出和标准错误输出到 file。
+# cmd1 | cmd2                         # cmd1 的输出通过管道连接到 cmd2 的输入
+# cmd1 |&amp; cmd2                        # cmd1 的输出和错误输出通过管道连接到 cmd2 的输入</code>
+    </pre>
+    <p>Csh/tcsh 的设置在 <code>~/.cshrc</code> 中，使用"source .cshrc"来重新加载。例子：</p>
+    <pre>
+      <code># in .cshrc
+alias  ls      'ls -aF'
+alias  ll      'ls -aFls'
+alias  la      'ls -all'
+alias  ..      'cd ..'
+alias  ...     'cd ../..'
+set   prompt    = "%B%n%b@%B%m%b%/&gt; " # 像 user@host/path/todir&gt;set   history   =  5000
+set   savehist  = ( 6000 merge )
+set   autolist                        # 控制命令补全和变量补全
+set   visiblebell                     # 使用闪动屏幕的方式来取代蜂鸣器鸣叫
+
+# Bindkey 和颜色bindkey -e     Select Emacs bindings  # 将命令行编辑器切换到emacs模式bindkey -k up history-search-backward # 使用上下键来搜索bindkey -k down history-search-forward
+setenv CLICOLOR 1                     # 使用颜色(可能的话)setenv LSCOLORS ExGxFxdxCxDxDxBxBxExEx</code>
+    </pre>
+    <p>该 emacs 模式将使用 emacs 快捷键来修改命令提示行。这是非常有用的(不单为 Emacs 用户)。最常用的命令如下：</p>
+    <ul>
+      <li>
+        <p>C-a       移动光标到行头</p>
+      </li>
+      <li>
+        <p>C-e       移动光标到行尾</p>
+      </li>
+      <li>
+        <p>M-b       移动光标到前一个单词</p>
+      </li>
+      <li>
+        <p>M-f       移动光标到后一个单词</p>
+      </li>
+      <li>
+        <p>M-d       剪切下一个单词</p>
+      </li>
+      <li>
+        <p>C-w       剪切最后一个单词</p>
+      </li>
+      <li>
+        <p>C-u       剪切光标前所有字符</p>
+      </li>
+      <li>
+        <p>C-k       剪切光标后所有字符</p>
+      </li>
+      <li>
+        <p>C-y       粘帖最后剪切的字符(简易的粘帖)</p>
+      </li>
+      <li>
+        <p>C-_       重做</p>
+      </li>
+    </ul>
+    <p><em>注意:</em> C- = 按住 control 键，M- = 按住 meta (它通常为 alt 或者 escape)键。</p>
+  </body>
+</html>

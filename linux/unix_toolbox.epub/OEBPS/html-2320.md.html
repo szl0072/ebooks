@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <h3 id="public+key+authentication">Public key authentication</h3>
+    <p>使用公钥认证而不是密码连接主机。方法是附加你的公钥文件到远程主机。本例中我们用客户端产生的 key <strong>从 <em>host-client</em> 连接到 <em>host-server</em></strong>。</p>
+    <ul>
+      <li>
+        <p>使用 ssh-keygen 生成密钥对。私钥放在 <code>~/.ssh/id_dsa</code>，公钥在 <code>~/.ssh/id_dsa.pub</code>。</p>
+      </li>
+      <li>
+        <p>拷贝你的公钥到服务器的 <code>~/.ssh/authorized_keys2</code>。</p>
+      </li>
+    </ul>
+    <pre>
+      <code># ssh-keygen -t dsa -N ''
+# cat ~/.ssh/id_dsa.pub | ssh you@host-server "cat - &gt;&gt; ~/.ssh/authorized_keys2"</code>
+    </pre>
+    <h3 id="%E4%BD%BF%E7%94%A8%E6%9D%A5%E8%87%AA+ssh.com+%E7%9A%84+windows+%E5%AE%A2%E6%88%B7%E7%AB%AF">使用来自 ssh.com 的 Windows 客户端</h3>
+    <p>ssh.com 的非商业性版本的客户端可下载自它主 FTP 站点：<a href="http://ftp.ssh.com/pub/ssh/">ftp.ssh.com/pub/ssh/</a>。 用 ssh.com 客户端产生的密钥需要在 OpenSSH 服务器上进行转换。可以使用 ssh-keygen 命令来完成。</p>
+    <ul>
+      <li>
+        <p>使用 ssh.com 客户端创建一对密钥：Settings - User Authentication - Generate New....</p>
+      </li>
+      <li>
+        <p>我使用 DSA 密钥类型；密钥长度为 2048。</p>
+      </li>
+      <li>
+        <p>拷贝 ssh.com 客户端产生的公钥到服务器的 ~/.ssh 目录。</p>
+      </li>
+      <li>
+        <p>她的密钥对在 C:\Documents and Settings\%USERNAME%\Application Data\SSH\UserKeys。</p>
+      </li>
+      <li>
+        <p>在服务器上使用 ssh-keygen 转换公钥：</p>
+        <h1 id="%C2%A0cd%C2%A0%7E%2F.ssh"> cd ~/.ssh</h1>
+        <h1 id="%C2%A0ssh-keygen%C2%A0-i%C2%A0-f%C2%A0keyfilename.pub%C2%A0%3E%3E%C2%A0authorized_keys2"> ssh-keygen -i -f keyfilename.pub &gt;&gt; authorized_keys2</h1>
+      </li>
+    </ul>
+    <p><em>注意：</em> 我们使用 DSA 密钥，使用 RSA 密钥也是可以的。这个密钥不受密码保护。</p>
+    <h3 id="%E5%9C%A8+windows+%E4%B8%8A%E4%BD%BF%E7%94%A8+putty">在 Windows 上使用 Putty</h3>
+    <p><a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">Putty</a> 是一个简单并且自由的(MIT许可) ssh Windows 客户端。</p>
+    <ul>
+      <li>
+        <p>使用 puTTYgen 程序创建密钥对。</p>
+      </li>
+      <li>
+        <p>保存密钥对(比如：C:\Documents and Settings\%USERNAME%.ssh).</p>
+      </li>
+      <li>拷贝公钥到服务器的 ~/.ssh 目录：</li>
+    </ul>
+    <pre>
+      <code># scp .ssh/puttykey.pub root@192.168.51.254:.ssh/
+</code>
+    </pre>
+    <ul>
+      <li>使用 ssh-keygen 在 OpenSSH 服务器上转换这个公钥：</li>
+    </ul>
+    <pre>
+      <code>    # cd ~/.ssh
+    # ssh-keygen -i -f puttykey.pub &gt;&gt; authorized_keys2</code>
+    </pre>
+    <ul>
+      <li>在 Putty 中设置指向私钥的位置：Connection - SSH - Auth</li>
+    </ul>
+    <h3 id="%E6%A3%80%E6%9F%A5%E6%8C%87%E7%BA%B9">检查指纹</h3>
+    <p>在首次连接时，SSH 会请求保存不知道的主机指纹。要避免中间人(man-in-the-middle)攻击，服务器的管理员可以发送密钥指纹给客户端，来让其在首次登陆时验证服务器的真实性。使用 <code>ssh-keygen -l</code> 获取服务器的指纹：</p>
+    <pre>
+      <code># ssh-keygen -l -f /etc/ssh/ssh_host_rsa_key.pub      # RSA 密钥
+2048 61:33:be:9b:ae:6c:36:31:fd:83:98:b7:99:2d:9f:cd /etc/ssh/ssh_host_rsa_key.pub
+# ssh-keygen -l -f /etc/ssh/ssh_host_dsa_key.pub      # DSA 密钥(默认)
+2048 14:4a:aa:d9:73:25:46:6d:0a:48:35:c7:f4:16:d4:ee /etc/ssh/ssh_host_dsa_key.pub</code>
+    </pre>
+    <p>现在客户端在连接到服务器时可验证其服务器的真实性：</p>
+    <pre>
+      <code># ssh linda
+The authenticity of host 'linda (192.168.16.54)' can't be established.
+DSA key fingerprint is 14:4a:aa:d9:73:25:46:6d:0a:48:35:c7:f4:16:d4:ee.
+Are you sure you want to continue connecting (yes/no)? yes</code>
+    </pre>
+    <h3 id="%E5%AE%89%E5%85%A8%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93">安全文件传输</h3>
+    <p>一些简单的命令：  </p>
+    <pre>
+      <code># scp file.txt host-two:/tmp
+# scp joe@host-two:/www/*.html /www/tmp
+# scp -r joe@host-two:/www /www/tmp</code>
+    </pre>
+    <p>在 Konqueror 或 Midnight 控制台中，用地址 <strong>fish://user@gate</strong> 来访问远程文件系统是可行的，就是比较慢而已。<br/>
+此外，也可以用基于 SCP 文件系统客户端的 <strong>sshfs</strong> 来挂载一个远程目录。<a href="http://fuse.sourceforge.net/sshfs.html">看 fuse sshfs</a>.</p>
+    <h2 id="%E9%9A%A7%E9%81%93%28tunneling%29">隧道(Tunneling)</h2>
+    <p>SSH 隧道可以让你通过 SSH 连接进行端口转发(转发/反向隧道)，从而确保了传输及端口访问的安全。它只能工作在 TCP 协议上。通常端口转发命令如下(也可看 <a href="http://cb.vu/unixtoolbox_zh_CN.xhtml#sshnat">ssh 和 NAT 实例</a>)：</p>
+    <pre>
+      <code># ssh -L localport:desthost:destport user@gate  # gate 为目标主机网关
+# ssh -R destport:desthost:localport user@gate  # 转发你的 localport 到目标端口
+# ssh -X user@gate   # 转发 X 程序</code>
+    </pre>
+    <p>这将会连接到 gate 并转发端口到目标主机 desthost:destport。注意 desthost 为 gate 中的目标主机名。因此，如果连接到了 gate，那么 desthost 就是 localhost。也可以做更多的端口转发。</p>
+    <h2 id="%E5%9C%A8+gate+%E4%B8%8A%E7%9B%B4%E6%8E%A5%E8%BD%AC%E5%8F%91">在 gate 上直接转发</h2>
+    <p>假设我们想访问在 gate 上运行的 CVS(2401端口) 和 HTTP(80端口)。下面是个简单的例子，desthost 就是 localhost，我们使用本的端口 8080 代替 80 端口，所以我们不需要 root 权限。一旦 ssh session 打开，二个服务就都可在本地端口访问。</p>
+    <pre>
+      <code># ssh -L 2401:localhost:2401 -L 8080:localhost:80 user@gate</code>
+    </pre>
+    <h3 id="%E8%BD%AC%E5%8F%91+netbios+%E5%92%8C%E8%BF%9C%E7%A8%8B%E6%A1%8C%E9%9D%A2%E5%88%B0%E7%AC%AC%E4%BA%8C%E4%B8%AA%E6%9C%8D%E5%8A%A1%E5%99%A8">转发 Netbios 和远程桌面到第二个服务器</h3>
+    <p>假设有一台在 gate 后面没有运行 ssh 的 Winodws SMB 服务器。我们需要访问 SMB 共享和远程桌面。</p>
+    <pre>
+      <code># ssh -L 139:smbserver:139 -L 3388:smbserver:3389 user@gate</code>
+    </pre>
+    <p>现在这个 SMB 共享可以使用 \127.0.0.1\ 访问，但只能在本地共享关闭的情况下，因为<em>本的共享也是在 139 端口监听的</em>。<br/>
+保持本的共享也是可行的，因此我们需要为这个通道使用新 IP 地址来新建一个虚拟设备，SMB 共享将会使用此地址连接。此外，<em>本地 RDP 已经在 3389 端口监听了</em>，所以我们选择端口 3388。对于这个例子，让我们使用一个虚拟 IP 地址 10.1.1.1。  </p>
+    <ul>
+      <li>
+        <p>对于 Putty 上使用源端口=10.1.1.1:139。它可以创建多重回路(multiple loop)设备和通道。在 Windows 2000 上，只有 Putty 为我工作。</p>
+      </li>
+      <li>
+        <p>对于 ssh.com 的客户端，要禁用 "Allow local connections only"。因为 ssh.com 客户端绑定了所有地址，所以只能连接单个共享。</p>
+      </li>
+    </ul>
+    <p>现在用 IP 地址 10.1.1.1 创建回路(loopback)接口：</p>
+    <pre>
+      <code>- # 系统-&gt;控制面板-&gt;添加硬件 # 是，我已经连接了此硬件(Y) # 添加新的硬件设备(在列表最下面)。
+
+- # 安装我手动选择的硬件 # 网络适配器 # Microsoft , Microsoft Loopback Adapter。
+
+- 配置这个假设备的 IP 地址为 10.1.1.1，掩码 255.255.255.0，没有网关。
+
+- 高级-&gt;WINS，开启 LMHOSTS 查询；禁用 TCP/IP 上的 NetBIOS。
+
+- # 启用 Microsoft 网络客户端。# 禁用 Microsoft 网络文件和打印机共享</code>
+    </pre>
+    <p>做完这些之后我有重启。现在用 \10.1.1.1 连接 SMB 共享和用 10.1.1.1:3388 连接远程桌面。</p>
+    <h3 id="%E8%B0%83%E8%AF%95">调试</h3>
+    <p>如果不能工作：</p>
+    <ul>
+      <li>
+        <p>端口有没有转发：运行控制台运行 netstat -an 命令并查看有没有 0.0.0.0:139 或者 10.1.1.1:139</p>
+      </li>
+      <li>
+        <p>有没有 telnet 到 10.1.1.1 139？</p>
+      </li>
+      <li>
+        <p>你需要打开 "本地端口接受其他主机连接"。</p>
+      </li>
+      <li>"Microsoft 网络文件和打印机共享" 有没有被禁用？</li>
+    </ul>
+    <h2 id="%E5%9C%A8+nat+%E5%90%8E%E9%9D%A2%E8%BF%9E%E6%8E%A5%E4%B8%A4%E4%B8%AA%E5%AE%A2%E6%88%B7%E7%AB%AF">在 NAT 后面连接两个客户端</h2>
+    <p>假设两个客户端在一个 NAT 网关后面，cliadmin 客户端要连接到 cliuser 客户端(目的地)，两者都可用 ssh 登录到正在运行 sshd 的 gate 上。你不需要 root 权限，只要端口大于 1024 即可。我们在 gate 上使用 2022 端口。而且，由于 gate 使用与本地，所以网关端口不是必须的。<br/>
+开启 cliuser 客户端(从目标到 gate)：</p>
+    <pre>
+      <code># ssh -R 2022:localhost:22 user@gate            # 转发客户端 22 端口到 gate:2022 端口</code>
+    </pre>
+    <p>开启 cliadmin 客户端(从主机到 gate)：</p>
+    <pre>
+      <code># ssh -L 3022:localhost:2022 admin@gate         # 转发客户端 3022 端口到 gate:2022 端口</code>
+    </pre>
+    <p>现在 admin 可以直接连接 cliuser 客户端：</p>
+    <pre>
+      <code># ssh -p 3022 admin@localhost                   # local:3022 -&gt; gate:2022 -&gt; client:22</code>
+    </pre>
+    <h2 id="%E5%9C%A8+nat+%E5%90%8E%E9%9D%A2%E7%9A%84+vnc+%E8%BF%9E%E6%8E%A5">在 NAT 后面的 VNC 连接</h2>
+    <p>假设一个在 NAT 后面，监听在端口 5900 上可被访问的 Windows VNC 客户端。<br/>
+开启 cliwin 客户端到 gate：</p>
+    <pre>
+      <code># ssh -R 15900:localhost:5900 user@gate</code>
+    </pre>
+    <p>开启 cliadmin 客户端(从主机到 gate)：</p>
+    <pre>
+      <code># ssh -L 5900:localhost:15900 admin@gate</code>
+    </pre>
+    <p>现在 admin 直接连接到 VNC 客户端：</p>
+    <pre>
+      <code># vncconnect -display :0 localhost</code>
+    </pre>
+  </body>
+</html>

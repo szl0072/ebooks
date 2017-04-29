@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <p>所谓的 SSL/TLS 认证是加密的公钥认证，它由一个公用密钥和私用密钥组成。证书用来认证终端和加密数据的。例如，用在 web 服务器(https)或者邮件服务器(imaps)。</p>
+    <h3 id="%E6%AD%A5%E9%AA%A4">步骤</h3>
+    <ul>
+      <li>
+        <p>我们需要一个证书颁发机构来签署我们的证书。这一步通常由供应商提供，如 Thawte、Verisign等。不过，我们也可以创建我们自己的。</p>
+      </li>
+      <li>
+        <p>创建一个证书签发申请(signing request)。这个申请需要一个已经包含所有必需的信息的未签署证书(公共部分)。该证书申请通常发送到认证供应商去签署。这一步同样也在本地机器上创建了私钥。</p>
+      </li>
+      <li>
+        <p>证书颁发机构签署证书。</p>
+      </li>
+      <li>
+        <p>如果有需要，加入证书和密钥到单个文件来给应用程序使用(web 服务器、邮件服务器等）。</p>
+      </li>
+    </ul>
+    <h3 id="%E9%85%8D%E7%BD%AE+openssl">配置 OpenSSL</h3>
+    <p>我们使用 /usr/local/certs 作为这个例子的目录或者根据你的设置相应的编辑 /etc/ssl/openssl.cnf 文件，因此你知道文件将创建在哪里。以下是 openssl.cnf 的相关部分：</p>
+    <pre>
+      <code>[ CA_default ]
+dir             = /usr/local/certs/CA       # 保存所有信息的文件夹
+certs           = $dir/certs                # 已生成证书的默认保存目录
+crl_dir         = $dir/crl                  # 生成的证书撤销列表(CRL)的默认保存目录
+database        = $dir/index.txt            # 保存已签发证书的文本数据库文件</code>
+    </pre>
+    <p>确保所有目录已经创建</p>
+    <pre>
+      <code># mkdir -p /usr/local/certs/CA
+# cd /usr/local/certs/CA
+# mkdir certs crl newcerts private
+# echo "01" &gt; serial                        # 仅当 serial 不存在时
+# touch index.txt</code>
+    </pre>
+    <h3 id="%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E8%AE%A4%E8%AF%81%E6%8E%88%E6%9D%83">创建一个认证授权</h3>
+    <p>如果你没有来自供应商的认证授权，你必须创建你自己的。如果打算去供应商签署申请，那么这个步骤不是必须的。创建认证授权 (CA)：</p>
+    <pre>
+      <code># openssl req -new -x509 -days 730 -config /etc/ssl/openssl.cnf \
+-keyout CA/private/cakey.pem -out CA/cacert.pem</code>
+    </pre>
+    <h3 id="%E5%88%9B%E5%BB%BA%E8%AF%81%E4%B9%A6%E7%AD%BE%E5%8F%91%E7%94%B3%E8%AF%B7">创建证书签发申请</h3>
+    <p>要创建一个新证书(比如给邮件服务器或 web 服务器)，首先用其私钥创建证书申请。如果你的应用程序不支持加密的私钥(比如 UW-IMAP 就不支持)，那么就用 <code>-nodes</code> 来禁用加密。</p>
+    <pre>
+      <code># openssl req -new -keyout newkey.pem -out newreq.pem \
+-config /etc/ssl/openssl.cnf
+# openssl req -nodes -new -keyout newkey.pem -out newreq.pem \
+-config /etc/ssl/openssl.cnf                # 不对这个密钥加密</code>
+    </pre>
+    <h3 id="%E7%AD%BE%E7%BD%B2%E8%AF%81%E4%B9%A6">签署证书</h3>
+    <p>该证书申请由 CA 签发确认，这个步骤通常由供应商完成。<em>注意：在下面命令中替换 "servername" 成你的服务器名称</em>。</p>
+    <pre>
+      <code># cat newreq.pem newkey.pem &gt; new.pem
+# openssl ca -policy policy_anything -out servernamecert.pem \
+-config /etc/ssl/openssl.cnf -infiles new.pem
+# mv newkey.pem servernamekey.pem</code>
+    </pre>
+    <p>现在，servernamekey.pem 就是私钥，servernamecert.pem 就为服务器的证书。</p>
+    <h3 id="%E5%88%9B%E5%BB%BA%E8%81%94%E5%90%88%E8%AE%A4%E8%AF%81%28united+certificate%29">创建联合认证(united certificate)</h3>
+    <p>IMAP 服务器想要私钥和服务器证书在同一个文件中。通常，这还是比较容易处理的，但是该文件要保证安全! Apache 也可以处理好它。创建一个包含证书和密钥的文件 servername.pem 。</p>
+    <ul>
+      <li>
+        <p>用文本编辑器打开私钥文件(servernamekey.pem)，并拷贝私钥到 "servername.pem" 文件中去。</p>
+      </li>
+      <li>
+        <p>服务器证书(servernamecert.pem)也做同样的动作。</p>
+      </li>
+    </ul>
+    <p>最后 servername.pem 文件应该看起来像这样：  </p>
+    <pre>
+      <code>-----BEGIN RSA PRIVATE KEY-----
+MIICXQIBAAKBgQDutWy+o/XZ/[...]qK5LqQgT3c9dU6fcR+WuSs6aejdEDDqBRQ
+-----END RSA PRIVATE KEY-----
+-----BEGIN CERTIFICATE-----
+MIIERzCCA7CgAwIBAgIBBDANB[...]iG9w0BAQQFADCBxTELMAkGA1UEBhMCREUx
+-----END CERTIFICATE-----</code>
+    </pre>
+    <p>现在我们的 /usr/local/certs/ 目录中有了这些；</p>
+    <ul>
+      <li>
+        <p>CA/private/cakey.pem <em>(CA 服务器私钥)</em></p>
+      </li>
+      <li>
+        <p>CA/cacert.pem <em>(CA 服务器公钥)</em></p>
+      </li>
+      <li>
+        <p>certs/servernamekey.pem <em>(服务器私钥)</em></p>
+      </li>
+      <li>
+        <p>certs/servernamecert.pem <em>(服务器已签署的证书)</em></p>
+      </li>
+      <li>
+        <p>certs/servername.pem <em>(私钥和服务器证书)</em></p>
+      </li>
+    </ul>
+    <p>要保证私钥的安全!</p>
+    <h3 id="%E6%9F%A5%E7%9C%8B%E8%AF%81%E4%B9%A6%E4%BF%A1%E6%81%AF">查看证书信息</h3>
+    <p>要查看证书信息，只要这么做：</p>
+    <pre>
+      <code># openssl x509 -text -in servernamecert.pem      # 显示证书信息
+# openssl req -noout -text -in server.csr        # 显示申请信息
+# openssl s_client -connect cb.vu:443            # 检查 web 服务器认证信息</code>
+    </pre>
+  </body>
+</html>

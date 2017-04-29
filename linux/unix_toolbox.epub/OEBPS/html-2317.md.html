@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <h2 id="%E8%BF%9B%E7%A8%8B%E5%88%97%E8%A1%A8">进程列表</h2>
+    <p>PID是每个进程唯一号码。使用 <code>ps</code> 获取所有正在运行的进程列表。 </p>
+    <pre>
+      <code># ps -auxefw                         
+# 所有正在运行进程的详尽列表</code>
+    </pre>
+    <p>然而，更典型的用法是使用管道或者 <code>pgrep</code>:   </p>
+    <pre>
+      <code># ps axww | grep cron
+  586  ??  Is     0:01.48 /usr/sbin/cron -s
+# ps aux | grep 'ss[h]'              
+# Find all ssh pids without the grep pid
+# pgrep -l sshd                      
+# 查找所有进程名中有sshd的进程ID
+# echo $$                            
+# The PID of your shell
+# fuser -va 22/tcp                   
+# 列出使用端口22的进程
+# fuser -va /home                    
+# 列出访问 /home 分区的进程
+# strace df                          
+# 跟踪系统调用和信号
+# truss df                           
+# 同上(FreeBSD/Solaris/类Unix)
+# history | tail -50                 
+# 显示最后50个使用过的命令</code>
+    </pre>
+    <h2 id="%E4%BC%98%E5%85%88%E7%BA%A7">优先级</h2>
+    <p>用 <code>renice</code> 更改正在运行进程的优先级。负值是更高的优先级，最小为-20，其正值与 "nice" 值的意义相同。    # renice -5 586                      </p>
+    <h1 id="%C2%A0%E6%9B%B4%E5%BC%BA%E7%9A%84%E4%BC%98%E5%85%88%E7%BA%A7586%3A%C2%A0old%C2%A0priority%C2%A00%2C%C2%A0new%C2%A0priority%C2%A0-5"> 更强的优先级586: old priority 0, new priority -5</h1>
+    <p>使用 <code>nice</code> 命令启动一个已定义优先级的进程。 正值为低优先级，负值为高优先级。确定你知道 <code>/usr/bin/nice</code> 或者使用 shell 内置命令(<code># which nice</code>)。   </p>
+    <pre>
+      <code># nice -n -5 top                     
+# 更高优先级(/usr/bin/nice)
+# nice -n 5 top                      
+# 更低优先级(/usr/bin/nice)
+# nice +5 top                        
+# tcsh 内置 nice 命令(同上)</code>
+    </pre>
+    <p>nice 可以影响 CPU 的调度，另一个实用命令 <code>ionice</code> 可以调度磁盘 IO。This is very useful for intensive IO application which can bring a machine to its knees while still in a lower priority. 此命令仅可在 Linux (AFAIK) 上使用。你可以选择一个类型(idle - best effort - real time)，它的 man 页很短并有很好的解释。 </p>
+    <pre>
+      <code># ionice c3 -p123                    
+# 给 pid 123 设置为 idle 类型
+# ionice -c2 -n0 firefox             
+# 用 best effort 类型运行 firefox 并且设为高优先级
+# ionice -c3 -p$$                    
+# 将当前的进程(shell)的磁盘 IO 调度设置为 idle 类型</code>
+    </pre>
+    <p>例中最后一条命令对于编译(或调试)一个大型项目会非常有用。每一个运行于此 shell 的命令都会有一个较低的优先级，但并不妨碍这个系统。$$ 是你 shell 的 pid (试试 echo $$)。</p>
+    <h2 id="%E5%89%8D%E5%8F%B0%2F%E5%90%8E%E5%8F%B0">前台/后台</h2>
+    <p>当一个进程在 shell 中已运行，可以使用 <code>[Ctrl]-[Z] (^Z)</code>, <code>bg</code> 和 <code>fg</code> 来 调入调出前后台。举个例子：启动 2 个进程，调入后台。使用 <code>jobs</code> 列出后台列表，然后再调入一个进程到前台。   # ping cb.vu &gt; ping.log<br/>
+^Z                                   </p>
+    <h1 id="%C2%A0ping%C2%A0%E4%BD%BF%E7%94%A8%C2%A0%5Bctrl%5D-%5Bz%5D%C2%A0%E6%9D%A5%E6%9A%82%E5%81%9C%28%E5%81%9C%E6%AD%A2%29%C2%A0"> ping 使用 [Ctrl]-[Z] 来暂停(停止) </h1>
+    <pre>
+      <code># bg                                 
+# 调入后台继续运行# jobs -l                            
+# 后台进程列表[1]  - 36232 Running                       ping cb.vu &gt; ping.log
+[2]  + 36233 Suspended (tty output)        top
+# fg %2                              
+# 让进程 2 返回到前台运行</code>
+    </pre>
+    <p>使用 <code>nohup</code> 开启一个持续运行的进程直到 shell 被关闭(避免挂断)。   # nohup ping -i 60 &gt; ping.log &amp;</p>
+    <h2 id="top">Top</h2>
+    <p><code>top</code> 程序用来实时显示系统中各个进程的运行信息。 # top</p>
+    <p>当 <code>top</code> 在运行的时候，按下 <code>h</code> 键会显示帮助画面。常用键如下：</p>
+    <ul>
+      <li>
+        <p><strong>u [用户名]</strong> 只显示属于此用户的进程。使用 + 或者空白可以查看所有用户</p>
+      </li>
+      <li>
+        <p><strong>k [PID]</strong> 结束 PID 进程</p>
+      </li>
+      <li>
+        <p><strong>1</strong> 显示所有进程状态信息(只有Linux)</p>
+      </li>
+      <li>
+        <p><strong>R</strong> 将当前排序倒转</p>
+      </li>
+    </ul>
+    <h2 id="kill%E5%91%BD%E4%BB%A4%E4%B8%8E%E4%BF%A1%E5%8F%B7">Kill命令与信号</h2>
+    <p>使用 <code>kill</code> 或 <code>killall</code> 终止或发送一个信号给进程。 </p>
+    <pre>
+      <code># ping -i 60 cb.vu &gt; ping.log &amp; [1] 4712
+# kill -s TERM 4712                  
+# 同 kill -15 4712
+# killall -1 httpd                   
+# 发送 HUP 信号终止进程 httpd
+# pkill -9 http                      
+# 发送 TERM 信号终止包含 http 的进程
+# pkill -TERM -u www                 
+# 发送 TERM 信号终止 www 所有者进程# fuser -k -TERM -m /home            
+# 终止所有访问 /home 的进程(卸载该分区前)</code>
+    </pre>
+    <p>下面是一些重要的信号：</p>
+    <ul>
+      <li>1       <code>HUP</code> (挂起)</li>
+      <li>2       <code>INT</code> (中断)</li>
+      <li>3       <code>QUIT</code> (退出)</li>
+      <li>9       <code>KILL</code> (KILL 信号不能被捕捉，不能被忽略。)</li>
+      <li>15     <code>TERM</code> (软件终止信号)</li>
+    </ul>
+  </body>
+</html>

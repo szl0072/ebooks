@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <h2 id="c+%E5%9F%BA%E7%A1%80">C 基础</h2>
+    <pre>
+      <code>strcpy(newstr,str)                        /* 拷贝 str 到 newstr */
+expr1 ? expr2 : expr3                     /* if (expr1) expr2 else expr3 */
+x = (y &gt; z) ? y : z;                      /* if (y &gt; z) x = y; else x = z; */
+int a[]={0,1,2};                          /* 初始化数组 (或者 a[3]={0,1,2}; */
+int a[2][3]={{1,2,3},{4,5,6}};            /* 初始化二维数组 */
+int i = 12345;                            /* 从 i 转换成 char str */
+char str[10];
+sprintf(str, "%d", i);</code>
+    </pre>
+    <h2 id="c+%E5%AE%9E%E4%BE%8B">C 实例</h2>
+    <p>一个最小化的 C 程式 simple.c：   </p>
+    <pre>
+      <code>#include &lt;stdio.h&gt;
+main() {
+    int number=42;
+    printf("The answer is %i\n", number);  
+}</code>
+    </pre>
+    <p>编译： # gcc simple.c -o simple</p>
+    <h1 id="%C2%A0.%2Fsimple"> ./simple</h1>
+    <pre>
+      <code>The answer is 42</code>
+    </pre>
+    <h2 id="c%2B%2B+%E5%9F%BA%E7%A1%80">C++ 基础</h2>
+    <pre>
+      <code>*pointer                                  // 指向对象的指针
+&amp;obj                                      // 对象 obj 的地址
+obj.x                                     // 类(对象) obj 成员 x
+pobj-&gt;x                                   // 指针 pobj 指向类(对象)成员 x
+                                          // (*pobj).x 同 pobj-&gt;x</code>
+    </pre>
+    <h2 id="c%2B%2B+%E5%AE%9E%E4%BE%8B">C++ 实例</h2>
+    <p>来一个稍微现实一点的 C++ 程序，我们在一个头文件(IPv4.h)中创建一个类并且实现它(IPv4.cpp)，然后创建一个程式来使用其功能。这个类的成员方法实现了 IP 地址从一串整数转换成我们熟知的点分格式。这是一个最小化的 C++ 程式和多源文件(multi-source)的编译。</p>
+    <h3 id="ipv4+class">IPv4 class</h3>
+    <h4 id="ipv4.h%3A">IPv4.h:</h4>
+    <pre>
+      <code>#ifndef IPV4_H
+#define IPV4_H
+#include &lt;string&gt;
+namespace GenericUtils {                              // 创建 namespace
+    class IPv4 {                                      // 类定义
+        public:
+            IPv4();
+            ~IPv4();
+            std::string IPint_to_IPquad(unsigned long ip);// 成员方法接口
+    };
+} //namespace GenericUtils
+#endif // IPV4_H</code>
+    </pre>
+    <h4 id="ipv4.cpp%3A">IPv4.cpp:</h4>
+    <pre>
+      <code>#include "IPv4.h"
+#include &lt;string&gt;
+#include &lt;sstream&gt;
+using namespace std;                              // 使用 namespace
+using namespace GenericUtils;
+
+IPv4::IPv4() {}                                   // 默认构造/析构函数
+IPv4::~IPv4() {}
+string IPv4::IPint_to_IPquad(unsigned long ip) {  // 成员方法实现
+    ostringstream ipstr;                          // 使用字符串流
+    ipstr &lt;&lt; ((ip &amp;0xff000000) &gt;&gt; 24)             // 位右移
+          &lt;&lt; "." &lt;&lt; ((ip &amp;0x00ff0000) &gt;&gt; 16)
+          &lt;&lt; "." &lt;&lt; ((ip &amp;0x0000ff00) &gt;&gt; 8)
+          &lt;&lt; "." &lt;&lt; ((ip &amp;0x000000ff));
+    return ipstr.str();
+}</code>
+    </pre>
+    <h3 id="%E7%A8%8B%E5%BA%8F+simplecpp.cpp">程序 simplecpp.cpp</h3>
+    <pre>
+      <code>#include "IPv4.h"
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+int main (int argc, char* argv[]) {
+    string ipstr;                                 // 定义变量
+    unsigned long ipint = 1347861486;             // 数字形式的 IP
+    GenericUtils::IPv4 iputils;                   // 创建一个类的对象
+    ipstr = iputils.IPint_to_IPquad(ipint);       // 调研类的成员方法
+    cout &lt;&lt; ipint &lt;&lt; " = " &lt;&lt; ipstr &lt;&lt; endl;      // 输出结果
+
+    return 0;
+}</code>
+    </pre>
+    <p>编译和执行：  </p>
+    <pre>
+      <code># g++ -c IPv4.cpp simplecpp.cpp                # 编译成目标文件
+# g++ IPv4.o simplecpp.o -o simplecpp.exe      # 连接目标代码，生成可执行文件
+# ./simplecpp.exe 
+1347861486 = 80.86.187.238</code>
+    </pre>
+    <p>使用 <code>ldd</code> 脚本检查并列出可执行程序所依赖的共享库文件。这个命令同样可以用来检查共享库的丢失。  # ldd /sbin/ifconfig</p>
+    <h2 id="%E7%AE%80%E5%8D%95%E7%9A%84+makefile">简单的 Makefile</h2>
+    <p>相应的最小化多源文件(multi-source)编译 Makefile 显示如下。每一个命令行必须以 <em>tab</em> 开始！可以将一个较长行使用反斜线"\"来分解为多行。 </p>
+    <pre>
+      <code>    CC = g++
+    CFLAGS = -OOBJS = IPv4.o simplecpp.o
+    simplecpp: ${OBJS}
+        ${CC} -o simplecpp ${CFLAGS} ${OBJS}
+    clean:
+        rm -f ${TARGET} ${OBJS}</code>
+    </pre>
+  </body>
+</html>

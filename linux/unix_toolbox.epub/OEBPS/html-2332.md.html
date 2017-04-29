@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <h2 id="%E6%89%93%E5%8D%B0%E5%91%BD%E4%BB%A4+lpr">打印命令 lpr</h2>
+    <pre>
+      <code># lpr unixtoolbox.ps                 # 用默认打印机打印
+# export PRINTER=hp4600              # 更改默认打印机
+# lpr -Php4500 #2 unixtoolbox.ps     # 指定打印机 hp4500 并打印 2 份
+# lpr -o Duplex=DuplexNoTumble ...   # 启用双面打印# lpr -o PageSize=A4,Duplex=DuplexNoTumble ...
+# lpq                                # 查看默认打印机的队列
+# lpq -l -Php4500                    # 详细显示打印机队列信息
+# lprm -                             # 删除所有打印机内的用户打印作业
+# lprm -Php4500 3186                 # 删除作业 3186。可使用 lpq 查看作业号
+# lpc status                         # 列印所有可用打印机
+# lpc status hp4500                  # 如果打印机在线，查看其状态和列队长度</code>
+    </pre>
+    <p>当要打印 PDF 文件时，一些打印设备不具备处理 postscript 的能力。可以这样解决：</p>
+    <pre>
+      <code># gs -dSAFER -dNOPAUSE -sDEVICE=deskjet -sOutputFile=\|lpr file.pdf</code>
+    </pre>
+  </body>
+</html>

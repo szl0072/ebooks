@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <p>自 4.3 版开始，OpenSSH 可以使用 tun/tap 设备来加密一个隧道。其非常类似于基于 TLS 的 VPN 解决方案(像 OpenVPN)。对于 SSH 的一个优势是，她不需要安装和配置额外的软件。另外隧道使用 SSH 认证(像共享密钥)。 其缺点是，对于一个缓慢的连接， 其传输效率较低。并且这个隧道依赖于单个(易断的) TCP 链接。这个技术对于快速设置一个基于 IP 的 VPN 来说非常有用。她对于用单个 TCP 端口转发没有限制，并且在所有 3/4 层 协议像 ICMP、TCP/UDP 等上都可用。不管怎么样，下面这些选择在 sshd_conf 文件中是必须的：</p>
+    <pre>
+      <code>PermitRootLogin yes
+PermitTunnel yes</code>
+    </pre>
+    <h2 id="%E5%8D%95%E4%B8%AA+p2p+%E8%BF%9E%E6%8E%A5">单个 P2P 连接</h2>
+    <p>这里，我们用点对点隧道连接 hclient 和 hserver 两个主机。这个连接是_从 hclient 开始_到 hserver 的，并且是用 root 来做。这个通道的连接点是 10.0.1.1(服务端)和 10.0.1.2(客户端)，然后我们创建设备 tun5(当然也可以是其它数字)。这个过程非常简单：</p>
+    <ul>
+      <li>
+        <p>使用 SSH 的通道选项 -w 来连接</p>
+      </li>
+      <li>
+        <p>设置隧道的 IP 地址。服务端和客户端各一次。</p>
+      </li>
+    </ul>
+    <h2 id="%E8%BF%9E%E6%8E%A5%E5%88%B0%E6%9C%8D%E5%8A%A1%E7%AB%AF">连接到服务端</h2>
+    <p>连接始于客户端,然后再服务端执行命令。</p>
+    <h3 id="linux%E4%B8%8A%E7%9A%84%E6%9C%8D%E5%8A%A1%E7%AB%AF">Linux上的服务端</h3>
+    <pre>
+      <code>cli&gt;# ssh -w5:5 
+root@hserversrv&gt;# ifconfig tun5 10.0.1.1 netmask 255.255.255.252   # 在服务端 shell 上执行</code>
+    </pre>
+    <h3 id="freebsd%E4%B8%8A%E7%9A%84%E6%9C%8D%E5%8A%A1%E7%AB%AF">FreeBSD上的服务端</h3>
+    <pre>
+      <code>cli&gt;# ssh -w5:5 root@hserversrv&gt;# ifconfig tun5 10.0.1.1 10.0.1.2                  # 在服务端 shell 上执行</code>
+    </pre>
+    <h2 id="%E8%BF%9E%E6%8E%A5%E5%88%B0%E5%AE%A2%E6%88%B7%E7%AB%AF">连接到客户端</h2>
+    <p>在客户端上执行命令：</p>
+    <pre>
+      <code>cli&gt;# ifconfig tun5 10.0.1.2 netmask 255.255.255.252   # Linux上的客户端
+cli&gt;# ifconfig tun5 10.0.1.2 10.0.1.1                  # FreeBSD上的客户端</code>
+    </pre>
+    <p>现在两个主机都连上了，并且可以在任何 3/4 层协议上使用此通道 IP 地址透明的通讯。</p>
+    <h2 id="%E8%BF%9E%E6%8E%A5%E4%B8%A4%E4%B8%AA%E7%BD%91%E7%BB%9C">连接两个网络</h2>
+    <p>除上面的 p2p 设置外，一个更有用的是SSH VPN 用两个 gate 连接两个私有网络。假设有这样一个例子，netA 为 192.168.51.0/24 还有 netB 为 192.168.16.0/24。设置过程同上面相似，我们只需要添加 routing。如果 gate 不同于默认网关，那在私有网络接口上必须开启 NAT。<br/>
+192.168.51.0/24 (netA)|gateA &lt;-&gt; gateB|192.168.16.0/24 (netB)  </p>
+    <ul>
+      <li>
+        <p>使用隧道选项 -w 连接 SSH。</p>
+      </li>
+      <li>
+        <p>配置隧道的 IP 地址。服务端和客户端各一次。</p>
+      </li>
+      <li>
+        <p>为两个网络添加 routing。</p>
+      </li>
+      <li>
+        <p>如果需要，在 gate 的私有网络接口上开启 NAT。</p>
+      </li>
+    </ul>
+    <p>设置是<em>从 netA 中的 gasteA 开始的</em>.</p>
+    <h2 id="%E8%BF%9E%E6%8E%A5+gatea+%E5%88%B0+gateb">连接 gateA 到 gateB</h2>
+    <p>连接从 gateA 开始，命令执行于 gateB。</p>
+    <h3 id="linux+%E4%B8%8A%E7%9A%84+gateb">Linux 上的 gateB</h3>
+    <pre>
+      <code>gateA&gt;# ssh -w5:5 
+root@gateBgateB&gt;# ifconfig tun5 10.0.1.1 netmask 255.255.255.252 # 在 gateB 的 shell 中执行
+gateB&gt;# route add -net 192.168.51.0 netmask 255.255.255.0 dev tun5
+gateB&gt;# echo 1 &gt; /proc/sys/net/ipv4/ip_forward         # 如果不是默认网关
+gateB&gt;# iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE</code>
+    </pre>
+    <h3 id="freebsd+%E4%B8%8A%E7%9A%84+gateb">FreeBSD 上的 gateB</h3>
+    <pre>
+      <code>gateA&gt;# ssh -w5:5 root@gateB                          # 创建 tun5 设备
+gateB&gt;# ifconfig tun5 10.0.1.1 10.0.1.2               # 在 gateB 的 shell 中执行
+gateB&gt;# route add 192.168.51.0/24 10.0.1.2
+gateB&gt;# sysctl net.inet.ip.forwarding=1               # 如果不是默认网关
+gateB&gt;# natd -s -m -u -dynamic -n fxp0                # 看 NATgateA&gt;# sysctl net.inet.ip.fw.enable=1</code>
+    </pre>
+    <h2 id="%E9%85%8D%E7%BD%AE+gatea">配置 gateA</h2>
+    <p>在 gateA 上执行命令：</p>
+    <h3 id="linux+%E4%B8%8A%E7%9A%84+gatea">Linux 上的 gateA</h3>
+    <pre>
+      <code>gateA&gt;# ifconfig tun5 10.0.1.2 netmask 255.255.255.252
+gateA&gt;# route add -net 192.168.16.0 netmask 255.255.255.0 dev tun5
+gateA&gt;# echo 1 &gt; /proc/sys/net/ipv4/ip_forward
+gateA&gt;# iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE</code>
+    </pre>
+    <h3 id="freebsd+%E4%B8%8A%E7%9A%84+gatea">FreeBSD 上的 gateA</h3>
+    <pre>
+      <code>gateA&gt;# ifconfig tun5 10.0.1.2 10.0.1.1
+gateA&gt;# route add 192.168.16.0/24 10.0.1.2
+gateA&gt;# sysctl net.inet.ip.forwarding=1
+gateA&gt;# natd -s -m -u -dynamic -n fxp0                # 看 NAT
+gateA&gt;# sysctl net.inet.ip.fw.enable=1</code>
+    </pre>
+    <p>现在两个私有网络都可以通过 SSH VPN 来透明的连接。如果 gate 不是默认网关，那么 IP 转发和 NAT 设置都是必须的。在这种情况下，客户端将不知道在哪里转发响应(response)，并且 NAT 必须是开启的。</p>
+  </body>
+</html>

@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta http-equiv="Default-Style" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" type="text/css" href="styles.css"/>
+    <title>Test Book</title>
+  </head>
+  <body class="book-content">
+    <p>正在运行的内核和系统信息</p>
+    <pre>
+      <code># uname -a                           
+# 获取内核版本（和BSD版本）
+# lsb_release -a                     
+# 显示任何 LSB 发行版版本信息
+# cat /etc/SuSE-release              
+# 获取 SuSE 版本
+# cat /etc/debian_version            
+# 获取 Debian 版本</code>
+    </pre>
+    <p>使用 /etc/<code>DISTR</code>-release 其中<code>DISTR(发行代号)=</code> lsb (Ubuntu), redhat, gentoo, mandrake, sun (Solaris), 等等。</p>
+    <pre>
+      <code># uptime                             
+# 显示系统开机运行到现在经过的时间
+# hostname                           
+# 显示系统主机名
+# hostname -i                        
+# 显示主机的 IP 地址
+# man hier                           
+# 描述文件系统目录结构
+# last reboot                        
+# 显示系统最后重启的历史记录</code>
+    </pre>
+    <h2 id="%E7%A1%AC%E4%BB%B6%E4%BF%A1%E6%81%AF">硬件信息</h2>
+    <p>内核检测到的硬件信息</p>
+    <pre>
+      <code># dmesg                             
+# 检测到的硬件和启动的消息
+# lsdev                              
+# 关于已安装硬件的信息
+# dd if=/dev/mem bs=1k skip=768 count=256 2&gt;/dev/null | strings -n 8 
+# 读取 BIOS 信息</code>
+    </pre>
+    <h2 id="linux">Linux</h2>
+    <pre>
+      <code># cat /proc/cpuinfo                  
+# CPU 讯息
+# cat /proc/meminfo                  
+# 内存信息
+# grep MemTotal /proc/meminfo        
+# 显示物理内存大小
+# watch -n1 'cat /proc/interrupts'   
+# 监控内核处理的所有中断
+# free -m                            
+# 显示已用和空闲的内存信息 (-m 为 MB)
+# cat /proc/devices                  
+# 显示当前核心配置的设备
+# lspci -tv                          
+# 显示 PCI 设备
+# lsusb -tv                          
+# 显示 USB 设备
+# lshal                              
+# 显示所有设备属性列表
+# dmidecode                          
+# 显示从 BIOS 中获取的硬件信息</code>
+    </pre>
+    <h2 id="freebsd">FreeBSD</h2>
+    <pre>
+      <code># sysctl hw.model                    # CPU 讯息
+# sysctl hw                          # 得到很多硬件信息
+# sysctl vm                          # 虚拟内存使用情况
+# dmesg | grep "real mem"            # 物理内存
+# sysctl -a | grep mem               # 内核内存的设置和信息
+# sysctl dev                         # 显示当前核心配置的设备
+# pciconf -l -cv                     # 显示 PCI 设备
+# usbdevs -v                         # 显示 USB 设备
+# atacontrol list                    # 显示 ATA 设备</code>
+    </pre>
+    <h2 id="%E6%98%BE%E7%A4%BA%E7%8A%B6%E6%80%81%E4%BF%A1%E6%81%AF">显示状态信息</h2>
+    <p>以下的命令有助于找出正在系统中运行着的程序。</p>
+    <pre>
+      <code># top                                
+# 显示和更新使用 cpu 最多的进程
+# mpstat 1                           
+# 显示进程相关的信息
+# vmstat 2                           
+# 显示虚拟内存的状态信息
+# iostat 2                           
+# 显示 I/O 状态信息(2 秒 间隙)
+# systat -vmstat 1                   
+# 显示 BSD 系统状态信息(1 秒 间隙)
+# systat -tcp 1                      
+# 显示 BSD TCP 连接信息(也可以试试 -ip)
+# systat -netstat 1                  
+# 显示 BSD 当前网络连接信息
+# systat -ifstat 1                   
+# 显示 BSD 当前网卡带宽信息
+# systat -iostat 1                   
+# 显示 BSD CPU 和磁盘使用情况
+# tail -n 500 /var/log/messages      
+# 显示最新500条内核/系统日志的信息# tail /var/log/warn                 
+# 显示系统警告信息(看syslog.conf)</code>
+    </pre>
+    <h2 id="%E7%94%A8%E6%88%B7">用户</h2>
+    <pre>
+      <code># id                                 
+# 显示当前用户和用户组的 ID
+# last                               
+# 列出目前与过去登入系统的用户相关信息
+# who                                
+# 显示目前登入系统的用户信息
+# groupadd admin                     
+# 建立新组"admin"和添加新用户 colin 并加入 admin 用户组(Linux/Solaris)
+# useradd -c "Colin Barschel" -g admin -m colin
+# userdel colin                      
+# 删除用户 colin(Linux/Solaris)
+# adduser joe                        
+# FreeBSD 添加用户 joe(交互式)
+# rmuser joe                         
+# FreeBSD 删除用户 joe(交互式)
+# pw groupadd admin                  
+# 在 FreeBSD 上使用 pw
+# pw groupmod admin -m newmember     
+# 添加新用户到一个组
+# pw useradd colin -c "Colin Barschel" -g admin -m -s /bin/tcsh 
+# pw userdel colin; pw groupdel admin</code>
+    </pre>
+    <p>加密过的密码存储在 /etc/shadow (Linux and Solaris) 或 /etc/master.passwd (FreeBSD) 中. 如果手动修改了 master.passwd，需要运行 <code># pwd_mkdb -p master.passwd</code> 来重建数据库。  </p>
+    <p>使用 nologin 来临时阻止所有用户登录(root除外)。用户登录时将会显示 nologin 中的信息。</p>
+    <pre>
+      <code># echo "Sorry no login now" &gt; /etc/nologin       
+# (Linux)
+# echo "Sorry no login now" &gt; /var/run/nologin   
+# (FreeBSD)</code>
+    </pre>
+    <h2 id="%E9%99%90%E5%88%B6">限制</h2>
+    <p>某些应用程序需要设置可打开最大文件和 socket 数量(像代理服务器，数据库)。 默认限制通常很低。</p>
+    <h2 id="linux-1">Linux</h2>
+    <h3 id="%E6%AF%8F+shell%2F%E8%84%9A%E6%9C%AC">每 shell/脚本</h3>
+    <p>shell 的限制是受 <code>ulimit</code> 支配的。使用 <code>ulimit -a</code> 可查看其状态信息。 举个例子，改变可打开最大文件数从 1024 到 10240，可以这么做：</p>
+    <pre>
+      <code># ulimit -n 10240                    
+# 这只在shell中有用</code>
+    </pre>
+    <p><code>ulimit</code> 命令可以使用在脚本中来更改对此脚本的限制。</p>
+    <h3 id="%E6%AF%8F+%E7%94%A8%E6%88%B7%2F%E8%BF%9B%E7%A8%8B">每 用户/进程</h3>
+    <p>登录用户和应用程序的限制可以在 <code>/etc/security/limits.conf</code> 中配置。举个例子：</p>
+    <pre>
+      <code># cat /etc/security/limits.conf
+*   hard    nproc   250              
+# 限制所有用户进程数asterisk hard nofile 409600          
+# 限制应用程序可打开最大文件数</code>
+    </pre>
+    <h3 id="%E7%B3%BB%E7%BB%9F%E7%BA%A7">系统级</h3>
+    <p>用sysctl来设置内核限制。要使其永久，可以在 <code>/etc/sysctl.conf</code> 中进行配置。</p>
+    <pre>
+      <code># sysctl -a                          
+# 显示所有系统限制
+# sysctl fs.file-max                 
+# 显示系统最大文件打开数
+# sysctl fs.file-max=102400          
+# 更改系统最大文件打开数
+# cat /etc/sysctl.conf
+fs.file-max=102400                   
+# 在 sysctl.conf 中的永久项
+# cat /proc/sys/fs/file-nr           
+# 在使用的文件句柄数</code>
+    </pre>
+    <h2 id="freebsd-1">FreeBSD</h2>
+    <h3 id="%E6%AF%8F+shell%2F%E8%84%9A%E6%9C%AC-1">每 shell/脚本</h3>
+    <p>在 csh 或 tcsh 中使用 <code>limits</code> 命令，在 sh 或 bash 中使用 <code>ulimit</code> 命令。</p>
+    <h3 id="%E6%AF%8F+%E7%94%A8%E6%88%B7%2F%E8%BF%9B%E7%A8%8B-1">每 用户/进程</h3>
+    <p>在 <code>/etc/login.conf</code> 中配置登录后的默认限制。未作限制的值为系统最大限制值。</p>
+    <h3 id="%E7%B3%BB%E7%BB%9F%E7%BA%A7-1">系统级</h3>
+    <p>内核限制同样使用 sysctl 来设置。永久配置，在 <code>/etc/sysctl.conf</code> 或 <code>/boot/loader.conf</code> 中。其语法与 Linux 相同，只是键值不同。</p>
+    <pre>
+      <code># sysctl -a                          
+# 显示所有系统限制# sysctl kern.maxfiles=XXXX          
+# 最大文件描述符数kern.ipc.nmbclusters=32768           
+# 在 /etc/sysctl.conf 中的永久项kern.maxfiles=65536                  
+# Squid 通常用这个值kern.maxfilesperproc=32768
+kern.ipc.somaxconn=8192              
+# TCP 列队。apache/sendmail 最好用这个值# sysctl kern.openfiles              
+# 在使用的文件描述符数# sysctl kern.ipc.numopensockets     
+# 已经开启的 socket 数目</code>
+    </pre>
+    <p>详情请看 <a href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/configtuning-kernel-limits.html">FreeBSD 手册 11章</a>。</p>
+    <h2 id="solaris">Solaris</h2>
+    <p>在 <code>/etc/system</code> 中的下列设置，会提高每个进程可以打开最大文件描述符的数量：</p>
+    <pre>
+      <code>set rlim_fd_max = 4096               
+# 一个进程可以打开文件描述符的"硬"限制set rlim_fd_cur = 1024               
+# 一个进程可以打开文件描述符的"软"限制</code>
+    </pre>
+    <h2 id="%E8%BF%90%E8%A1%8C%E7%BA%A7%E5%88%AB">运行级别</h2>
+    <h3 id="linux-2">Linux</h3>
+    <p>一旦内核加载完成，内核会启动 <code>init</code> 进程，然后运行 <code>rc</code> 脚本，之后运行所有属于其运行级别的命令脚本。这些脚本都储存在 /etc/rc.d/rcN.d 中(N代表运行级别)，并且都建立着到 /etc/init.d 子目录中命令脚本程序的符号链接。<br/>
+默认运行级别配置在 /etc/inittab 中。它通常为 3 或 5：</p>
+    <pre>
+      <code># grep default: /etc/inittab                                         
+id:3:initdefault:</code>
+    </pre>
+    <p>可以使用 <code>init</code> 来改变当前运行级别。举个例子：</p>
+    <pre>
+      <code># init 5                             
+# 进入运行级别 5</code>
+    </pre>
+    <p>运行级别列表如下：</p>
+    <ul>
+      <li>
+        <p>0       系统停止</p>
+      </li>
+      <li>
+        <p>1       进入单用户模式(也可以是 S)</p>
+      </li>
+      <li>
+        <p>2       没有 NFS 特性的多用户模式</p>
+      </li>
+      <li>
+        <p>3       完全多用户模式(正常操作模式)</p>
+      </li>
+      <li>
+        <p>4       未使用</p>
+      </li>
+      <li>
+        <p>5       类似于级别3，但提供 XWindow 系统登录环境</p>
+      </li>
+      <li>
+        <p>6       重新启动系统</p>
+      </li>
+    </ul>
+    <p>使用 <code>chkconfig</code> 工具控制程序在一个运行级别启动和停止。</p>
+    <pre>
+      <code># chkconfig --list                   
+# 列出所有 init 脚本# chkconfig --list sshd              
+# 查看 sshd 在各个运行级别中的启动配置
+# chkconfig sshd --level 35 on       
+# 对 sshd 在级别 3 和 5 下创建启动项
+# chkconfig sshd off                 
+# 在所有的运行级别下禁用 sshd</code>
+    </pre>
+    <p>Debian 和基于Debian 发行版像 Ubuntu 或 Knoppix 使用命令 <code>update-rc.d</code> 来管理运行级别脚本。默认启动为 2,3,4 和 5，停止为 0,1 和 6。</p>
+    <pre>
+      <code># update-rc.d sshd defaults          
+# 设置 sshd 为默认启动级别
+# update-rc.d sshd start 20 2 3 4 5 . stop 20 0 1 6 .  
+# 用显示参数
+# update-rc.d -f sshd remove         
+# 在所有的运行级别下禁用 sshd
+# shutdown -h now (或者 # poweroff)  
+# 关闭停止系统</code>
+    </pre>
+    <h2 id="freebsd-2">FreeBSD</h2>
+    <p>BSD 启动步骤不同于 SysV, 她没有运行级别。她的启动状态(单用户，有或没有 XWindow)被配置在 <code>/etc/ttys</code>中。所有的系统脚本都位于 <code>/etc/rc.d/</code>中，第三方应用程序位于<code>/usr/local/etc/rc.d/</code>中。service 的启动顺序被配置在 <code>/etc/rc.conf</code> 和<code>/etc/rc.conf.local</code>中。默认行为可在 <code>/etc/defaults/rc.conf</code> 中进行配置。 这些脚本至少响应 start|stop|status.</p>
+    <pre>
+      <code># /etc/rc.d/sshd status
+sshd is running as pid 552.
+# shutdown now                       
+# 进入单用户模式# exit                               
+# 返回到多用户模式# shutdown -p now                    
+# 关闭停止系统# shutdown -r now                    
+# 重新启动系统</code>
+    </pre>
+    <p>同样可以使用进程 <code>init</code> 进入下列状态级别。举个例子： <code># init 6</code> 为重启。</p>
+    <ul>
+      <li>
+        <p>0       停止系统并关闭电源 (信号 <code>USR2</code>)</p>
+      </li>
+      <li>
+        <p>1       进入单用户模式 (信号 <code>TERM</code>)</p>
+      </li>
+      <li>
+        <p>6       重新启动 (信号 <code>INT</code>)</p>
+      </li>
+      <li>
+        <p>c       阻止进一步登录 (信号 <code>TSTP</code>)</p>
+      </li>
+      <li>
+        <p>q       重新检查 ttys(5) 文件 (信号 <code>HUP</code>)</p>
+      </li>
+    </ul>
+    <h2 id="%E9%87%8D%E8%AE%BE+root+%E5%AF%86%E7%A0%81">重设 root 密码</h2>
+    <h3 id="linux+%E6%96%B9%E6%B3%95+1">Linux 方法 1</h3>
+    <p>在引导加载器(lilo 或 grub)中，键入如下启选项：</p>
+    <pre>
+      <code>init=/bin/sh</code>
+    </pre>
+    <p>内核会挂载 root 分区，进程 <code>init</code> 会启动 bourne shell 而不是 <code>rc</code>，然后是运行级别。使用命令 <code>passwd</code> 设置密码然后重启。别忘了需要在单用户模式下做这些动作。<br/>
+如果重启后 root 分区被挂载为只读，重新挂在它为读写：</p>
+    <pre>
+      <code># mount -o remount,rw /
+# passwd                            
+# 或者删除 root 密码 (/etc/shadow)
+# sync; mount -o remount,ro /        
+# sync 在重新挂在为只读之前 sync 一下
+# reboot</code>
+    </pre>
+    <h3 id="freebsd+%E5%92%8C+linux+%E6%96%B9%E6%B3%95+2">FreeBSD 和 Linux 方法 2</h3>
+    <p>FreeBSD 不会让你这么做。解决方案是用其他操作系统(像系统紧急修复光盘)挂载 root 分区，然后更改密码。</p>
+    <ul>
+      <li>
+        <p>用 live cd 或安装盘启动进入修复模式后，会得到一个 shell。</p>
+      </li>
+      <li>
+        <p>用 fdisk 查找 root 分区。比如：fdisk /dev/sda</p>
+      </li>
+      <li>
+        <p>挂载它并使用 chroot 命令:</p>
+      </li>
+    </ul>
+    <pre>
+      <code># mount -o rw /dev/ad4s3a /mnt
+# chroot /mnt                        
+# 改变程序执行时所参考的根目录位置为 /mnt# passwd
+# reboot</code>
+    </pre>
+    <h3 id="%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97">内核模块</h3>
+    <h3 id="linux-3">Linux</h3>
+    <pre>
+      <code># lsmod                              
+# 列出所有已载入内核的模块# modprobe isdn                      
+# 载入 isdn 模块</code>
+    </pre>
+    <h3 id="freebsd-3">FreeBSD</h3>
+    <pre>
+      <code># kldstat                            
+# 列出所有已载入内核的模块# kldload crypto                     
+# 载入 crypto 模块</code>
+    </pre>
+    <h3 id="%E7%BC%96%E8%AF%91%E5%86%85%E6%A0%B8">编译内核</h3>
+    <h3 id="linux-4">Linux</h3>
+    <pre>
+      <code># cd /usr/src/linux
+# make mrproper                      
+# 清除所有东西，包括配置文件
+# make oldconfig                     
+# 从当前内核配置文件的基础上创建一个新的配置文件
+# make menuconfig                    
+# 或者 xconfig (Qt) 或者 gconfig (GTK)
+# make                               
+# 创建一个已压缩的内核映像文件
+# make modules                       
+# 编译模块
+# make modules_install               
+# 安装模块
+# make install                       
+# 安装内核
+# reboot</code>
+    </pre>
+    <h3 id="freebsd-4">FreeBSD</h3>
+    <p>要改变和重建内核，需要拷贝源配置文件然后编辑它。当然也可以直接编辑 <code>GENERIC</code> 文件。</p>
+    <pre>
+      <code># cd /usr/src/sys/i386/conf/
+# cp GENERIC MYKERNEL
+# cd /usr/src
+# make buildkernel KERNCONF=MYKERNEL
+# make installkernel KERNCONF=MYKERNEL</code>
+    </pre>
+    <p>要重建完全的操作系统：</p>
+    <pre>
+      <code># make buildworld                    
+# 构建完全的系统，但不是内核
+# make buildkernel                   
+# 使用 KERNCONF 配置文件编译内核
+# make installkernel
+# reboot
+# mergemaster -p                     
+# 建立临时根环境并比对系统配置文件
+# make installworld
+# mergemaster                        
+# 升级所有配置和其他文件
+# reboot</code>
+    </pre>
+    <p>对于源的一些小改动，有时候简单的命令就足够了：</p>
+    <pre>
+      <code># make kernel world                  
+# 编译并安装内核和系统
+# mergemaster
+# reboot</code>
+    </pre>
+  </body>
+</html>

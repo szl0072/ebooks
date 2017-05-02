@@ -80,3 +80,6 @@
 
 25.kindle88.com  
 >[kindle88.com](http://www.kindle88.com/)
+  
+26.packtpub.com  
+>[packtpub.com](https://www.packtpub.com/all)
